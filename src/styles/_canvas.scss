@@ -1,0 +1,32 @@
+.canvas--container {
+    height: 100%;
+    width: 80%;
+    @include flex();
+    // overflow: scroll;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.canvas--platform {
+    @include flex(center, center, column);
+    box-shadow: 0 0 30px 0 black;
+}
+
+.canvas--row {
+    @include flex();
+}
+
+.canvas--tile {
+    box-sizing: border-box;
+
+    border-top-width:  1px;
+    border-top-style:  solid;
+    border-top-color:  black;
+
+    border-left-width: 1px;
+    border-left-style: solid;
+    border-left-color: black;
+    &:hover {
+        cursor: pointer;
+    }
+}

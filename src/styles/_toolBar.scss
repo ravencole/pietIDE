@@ -1,0 +1,295 @@
+$sidebar--margin: 5px;
+
+.toolbarBorderRadius {
+    border-radius: 0px;
+}
+
+.toolBar--container {
+    height: 100%;
+    width: 20%;
+    background-color: $toolBar--background;
+    box-shadow: 0 0 40px 0 rgba(0,0,0,0.5);
+    @include flex(center, flex-start, column);
+    z-index: 10;
+}
+
+.colorPicker--container {
+    height: 30%;
+    width: 100%;
+    @include flex();
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.colorPicker--pallet {
+    @extend .toolbarBorderRadius;
+    @include flex(center, center, column);
+    height: 100%;
+    flex: 3;
+}
+
+.colorPicker--active {
+    @extend .toolbarBorderRadius;
+    height: 100%;
+    flex: 1;
+    @include flex(center, center, column);
+}
+
+.pallet--row {
+    width: 100%;
+    flex: 1;
+    @include flex();
+}
+
+.pallet--box {
+    @extend .toolbarBorderRadius;
+    height: 100%;
+    flex: 1;
+    border: 1px solid white;
+    box-sizing: border-box;
+}
+
+.activeColor--foreground {
+    @extend .toolbarBorderRadius;
+    width: 100%;
+    flex: 4;
+}
+.activeColor--background {
+    @extend .toolbarBorderRadius;
+    width: 100%;
+    flex: 3;
+}
+
+.commandViewer--container {
+    @extend .toolbarBorderRadius;
+    @include flex(center, center, column);
+    box-sizing: border-box;
+    margin-top: $sidebar--margin;
+    height: 30%;
+    width: 100%;
+    background-color: white;
+    position: relative;
+}
+.commandViewer--row {
+    width: 100%;
+    flex: 1;
+    @include flex();
+}
+.commandViewer--box {
+    @extend .toolbarBorderRadius;
+    height: 100%;
+    flex: 1;
+    @include flex();
+    font-family: monospace;
+    box-sizing: border-box;
+    border: 2px solid white;
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.commandViewer--pop-out {
+    // border-radius: 0 5px 5px 0;
+    position: absolute;
+    top: 50%;
+    height: 75%;
+    width: 350px;
+    transition: left 400ms, border-right 10ms;
+    transform: translateY(-50%);
+    background-color: white;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+    z-index: -1;
+    box-shadow: 10px 0 30px 0 rgba(0,0,0,0.5);
+    @include flex(center, flex-start, column);
+    & h2 {
+        font-family: monospace;
+        text-align: center;
+        width: 90%;
+        // margin-top: 0;
+        padding-bottom: 3px;
+        border-bottom: 1px solid $toolBar--background;
+    }
+    & div {
+        font-family: monospace;
+        font-size: 12px;
+        overflow: scroll;
+        width: 90%;
+        box-sizing: border-box;
+    }
+    &::before {
+        content: '';
+        position: absolute;
+        top:   50%;
+        right: 100%;
+        transform: translateY(-50%);
+
+        width:  0; 
+        height: 0; 
+        border-bottom: 20px solid transparent;
+        border-top:    20px solid transparent;
+        border-right:  20px solid white;
+    }
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.canvasResizer--container {
+    @extend .toolbarBorderRadius;
+    margin-top: $sidebar--margin;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: monospace;
+    @include flex();
+    background-color: white;
+    padding: 5px;
+}
+
+.canvasResizer--title {
+    color: black;
+    font-weight: bold;
+}
+
+.canvasResizer--input {
+    height: 100%;
+    flex: 1;
+    @include flex(center, center, column);
+    & input {
+        width: 20px;
+        text-align: center;
+        font-family: monospace;
+    }
+    &:not(:last-child) {
+        border-right: 1px solid black;
+    }
+}
+
+.cursorInfo--container {
+    @extend .toolbarBorderRadius;
+    width: 100%;
+    background-color: white;
+    padding: 5px;
+    font-family: monospace;
+    box-sizing: border-box;
+    margin-top: $sidebar--margin;
+    @include flex();
+    & div {
+        height: 100%;
+        flex: 1;
+        box-sizing: border-box;
+        padding: 0 10px; 
+        &:first-child {
+            text-align: center;
+        }
+    }
+}
+
+.cursorInfo--title {
+    font-weight: bold;
+}
+
+.debug--container {
+    @extend .toolbarBorderRadius;
+    margin-top: $sidebar--margin;
+    flex-grow: 1;
+    width: 100%;
+    background-color: white;
+    font-family: monospace;
+    @include flex(center, flex-start, column);
+}
+
+.debugInfo--container {
+    width: 100%;
+    flex-grow: 1;
+    @include flex(flex-start);
+}
+
+.registers--container, .stack--container {
+    height: 100%;
+    flex: 1;
+}
+
+.registers--container {
+
+}
+
+.direction--container {
+    width: 100%;
+    padding-left: 5px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    & .direction--title {
+        font-weight: bold;
+        padding-left: 0px;
+        width: 100%;
+        text-align: center;
+    }
+    & span {
+        font-weight: bold;
+    }
+}
+
+.stack--container {
+    margin-top: 5px;
+    @include flex(center, flex-start, column);
+    & .stack--title {
+        font-weight: bold;
+        width: 100%;
+        text-align: center;
+    }
+    & .stack--list {
+        margin-top: 5px;
+        width: 90%;
+        background-color: $toolBar--background;
+        color: white;
+        min-height: 70px;
+        @include flex(flex-start, flex-start, column);
+        padding-left: 5px;
+    }
+}
+
+.debug--title {
+    padding: 2px;
+    text-align: center;
+    width: 95%;
+    font-weight: bold;
+    border-bottom: 1px solid black;
+}
+
+.programControls--container {
+    @extend .toolbarBorderRadius;
+    overflow: hidden;
+    margin-top: 5px;
+    width: 100%;
+    height: 50px;
+    @include flex();
+    background-color: white;
+    & .programControls--btn {
+        height: 90%;
+        flex: 1;
+        @include flex();
+        background-color: white;
+        transition: all 200ms ease;
+        &:hover {
+            cursor: pointer;
+        }
+        &:not(:last-child) {
+            border-right: 1px solid black;
+        }
+        & img {
+            height: 20px;
+            transition: all 100ms ease;
+        }
+        &:first-child:hover {
+            background-color: transparentize(#00ff00, 0.9);
+        }
+        &:nth-child(2):hover {
+            background-color: transparentize(#0000FF, 0.9);
+        }
+        &:last-child:hover {
+            background-color: transparentize(#FF0000, 0.9);
+        }
+    }
+}
