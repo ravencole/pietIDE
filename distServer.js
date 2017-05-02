@@ -9,7 +9,7 @@ const port = 3000;
 const app = express();
 
 app.use(compression());
-app.use(express.static(__dirname + '/resources'));
+app.use(express.static(__dirname + '/src'));
 app.use(express.static('dist'));
 
 

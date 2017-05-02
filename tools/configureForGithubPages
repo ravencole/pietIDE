@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cp ./dist/index.html index.html
+cp ./dist/bundle.js bundle.js
+
+echo 'index.html and bundle.js copied to project root!'

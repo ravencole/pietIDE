@@ -4,8 +4,10 @@ import { COMMAND_DESCRIPTIONS } from './constants'
 
 export default props => {
     const STYLES = {
-        left: props.infoModalIsVisible ? '100%' : '-7px',
-        borderRight: '3px solid' + props.currentColor
+        left: props.infoModalIsVisible ? '100%' : '7px',
+        borderRight: '3px solid' + props.currentColor,
+        width: props.infoModalIsVisible ? '350px' : '100%',
+        height: props.infoModalIsVisible ? '100%' : '75%'
     }
 
     const SHOW_COMMAND_DESCRIPTION = 

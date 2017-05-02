@@ -94,8 +94,7 @@ $sidebar--margin: 5px;
     position: absolute;
     top: 50%;
     height: 75%;
-    width: 350px;
-    transition: left 400ms, border-right 10ms;
+    transition: left 400ms, border-right 10ms, width 400ms, height 400ms;
     transform: translateY(-50%);
     background-color: white;
     padding-bottom: 20px;
@@ -111,7 +110,7 @@ $sidebar--margin: 5px;
         padding-bottom: 3px;
         border-bottom: 1px solid $toolBar--background;
     }
-    & div {
+    & div { 
         font-family: monospace;
         font-size: 12px;
         overflow: scroll;
