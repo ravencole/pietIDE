@@ -64,7 +64,6 @@ export default class CommandViewer extends Component {
             this.addCommandsToColorArray
         ], COMMAND_COLORS)
 
-        this.props.updateCommandsDisplay(COMMAND_ARRAY)
         return COMMAND_ARRAY
     }
     alignCommandSet(hue, lightness) {

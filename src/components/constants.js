@@ -83,6 +83,14 @@ export const COMMANDS = [
     ]
 ]
 
+export const COMMANDS_WITH_INDEX = COMMANDS.reduce((a,b,i) => {
+    b.map((command,j) => {
+        if (command.trim().length)
+            a[command] = [i,j]
+    })
+    return a
+}, {})
+
 export const COMMAND_DESCRIPTIONS = {
     push: 'Pushes the value of the colour block just exited on to the stack. Note that values of colour blocks are not automatically pushed on to the stack - this push operation must be explicitly carried out.',
     pop: 'Pops the top value off the stack and discards it.',

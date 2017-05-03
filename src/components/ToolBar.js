@@ -18,7 +18,6 @@ export default props => {
             />
             <CommandViewer 
                 currentForegroundColor={ props.currentForegroundColor }
-                updateCommandsDisplay={ props.updateCommandsDisplay }
             />
             <CanvasResizer 
                 canvasHeight={ props.canvasHeight }

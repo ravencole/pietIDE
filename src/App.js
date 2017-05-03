@@ -1,18 +1,25 @@
 import React, { Component } from 'react'
 
-import { SHORTCUT_LIST } from './components/constants'
 import Canvas from './components/Canvas'
 import ToolBar from './components/ToolBar'
 import { tokenize } from './Tokenizer'
+import { 
+    COMMANDS, 
+    COLORS_ARRAY, 
+    COLORS_BY_HEX,
+    COMMANDS_WITH_INDEX,
+    SHORTCUT_LIST
+} from './components/constants'
 
 export default class App extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
-            canvasRows: 40,
-            canvasColumns: 40,
-            cellSize: 10,
+            canvasRows: 10,
+            canvasColumns: 10,
+            cellSize: 30,
+            commandColors: [],
             commandsWithMethods: [],
             currentForegroundColor: '#FFF',
             currentBackgroundColor: '#000',
@@ -22,7 +29,8 @@ export default class App extends Component {
             tiles: [],
             mousedOverTileCoords: { x: null, y: null },
             inSelection: false,
-            selectedTiles: []
+            selectedTiles: [],
+            historySnapshot: []
         };
 
         [
@@ -30,6 +38,7 @@ export default class App extends Component {
             'addColorIntoTile',
             'destroySelection',
             'executeShortcut',
+            'forgroundAndBackgroundColorsToDefault',
             'handleSelectionAction',
             'handleSelectionClick',
             'handleTileClick',
@@ -44,7 +53,7 @@ export default class App extends Component {
             'updateCanvasCellSize',
             'updateCanvasHeight',
             'updateCanvasWidth',
-            'updateCommandsDisplay'
+            'updateHistory'
         ].map(m => this[m] = this[m].bind(this))
     }
     addColorIntoSelectGroup() {
@@ -57,20 +66,38 @@ export default class App extends Component {
             TILES[X][Y].selected = false
         })
 
-        this.setState(Object.assign(
+        return Object.assign(
             {},
             { tiles: TILES },
             this.selectionCleanup()
-        ))
+        )
     }
     addColorIntoTile(i,j) {
         const TILE_MAP = this.state.tiles
 
         TILE_MAP[i][j].color = this.state.currentForegroundColor
 
-        this.setState({
+        return {
             tiles: TILE_MAP
-        })
+        }
+    }
+    alignColorsArrayToForeground(hue, lightness) {
+        const VALID_COLORS = COLORS_ARRAY.slice(0, COLORS_ARRAY.length - 1)
+
+        while(VALID_COLORS[0][0].hue !== hue) {
+            const tmp = VALID_COLORS.shift()
+            VALID_COLORS.push(tmp)
+        }
+
+        while(VALID_COLORS[0][0].lightness !== lightness) {
+            VALID_COLORS.map(r => {
+                const tmp = r.shift()
+                r.push(tmp)
+                return r
+            })
+        }
+
+        return VALID_COLORS
     }
     componentDidMount() {
         this.renderNewCanvas()
@@ -85,15 +112,41 @@ export default class App extends Component {
             TILES[X][Y].selected = false
         })
 
-        this.setState(Object.assign(
+        return Object.assign(
             {},
             { tiles: TILES },
             this.selectionCleanup()
-        ))
+        )
     }
     executeShortcut(pattern) {
-        // console.log(this.state.commandsWithMethods)
-        console.log(pattern)
+        const FOREGROUND_IS_BLACK_OR_WHITE = 
+            this.state.currentForegroundColor === '#000' || 
+            this.state.currentForegroundColor === '#FFF'
+
+        if (FOREGROUND_IS_BLACK_OR_WHITE) {
+            return this.setState({
+                shortcutSequence: ''
+            })
+        }
+
+        const COLOR         = COLORS_BY_HEX[this.state.currentForegroundColor],
+              HUE           = COLOR.replace(/light|dark|mid/, '').toLowerCase(),
+              LIGHTNESS     = COLOR.replace(new RegExp(HUE, 'i'), ''),
+              SORTED_COLORS = this.alignColorsArrayToForeground(HUE, LIGHTNESS),
+              COMMAND       = SHORTCUT_LIST[pattern],
+              [ X,Y ]       = COMMANDS_WITH_INDEX[COMMAND]
+
+        this.setState({
+            currentForegroundColor: SORTED_COLORS[X][Y].hex,
+            shortcutSequence: ''
+        })
+    }
+    forgroundAndBackgroundColorsToDefault() {
+        this.setState({
+            currentForegroundColor: '#FFF',
+            currentBackgroundColor: '#000',
+            shortcutSequence: ''
+        })
     }
     handleSelectionAction(i,j) {
         const CLICK_IS_IN_SELECTION = this.state.selectedTiles.includes(`${i}:${j}`)
@@ -107,20 +160,20 @@ export default class App extends Component {
 
         TILES[i][j].selected = true
 
-        this.setState({
+        return {
             tiles: TILES,
             inSelection: true,
             selectedTiles: this.state.selectedTiles.concat([`${i}:${j}`])
-        })
+        }
     }
     handleTileClick(i,j, shiftKey) {
-        if (shiftKey) 
-            return this.handleSelectionClick(i,j)
-        
-        if (!shiftKey && this.state.inSelection)
-            return this.handleSelectionAction(i,j)
+        const NEXT_STATE = shiftKey ?
+                               this.handleSelectionClick(i,j) :
+                               this.state.inSelection ?
+                                   this.handleSelectionAction(i,j) :
+                                   this.addColorIntoTile(i,j)
 
-        this.addColorIntoTile(i,j)
+        this.updateHistory(NEXT_STATE)
     }
     onAppKeydown(e) {
         const KEY_CODE = e.keyCode
@@ -129,20 +182,30 @@ export default class App extends Component {
             const PATTERN = this.state.shortcutSequence + String.fromCharCode(KEY_CODE).toLowerCase(),
                   SHORTCUT_EXISTS = SHORTCUT_LIST.hasOwnProperty(PATTERN)
 
-            return SHORTCUT_EXISTS ?
-                      this.executeShortcut(PATTERN) :
-                      this.replaceShortcut(KEY_CODE)
+            if (SHORTCUT_EXISTS) {
+                return this.executeShortcut(PATTERN)
+            }
+
+            if (PATTERN === 'xx') {
+                this.onSwapForeGroundAndBackgroundColors()
+            }
+
+            if (PATTERN === 'dd') {
+                this.forgroundAndBackgroundColorsToDefault()
+            }
+
+            this.replaceShortcut(KEY_CODE)
         }
     }
-    onMouseOverTile(coords) {
-        if (this.state.inSelection) {
-            this.handleSelectionClick(coords.y, coords.x)
+    onMouseOverTile(coords, event) {
+        if (this.state.inSelection && event.shiftKey) {
+            return this.handleTileClick(coords.y, coords.x, event.shiftKey)
         }
         this.setState({
             mousedOverTileCoords: { x: coords.x, y: coords.y }
         })
     }
-    onMouseExitTile(coords) {
+    onMouseExitTile() {
         this.setState({
             mousedOverTileCoords: { x: null, y: null }
         })
@@ -155,7 +218,8 @@ export default class App extends Component {
     onSwapForeGroundAndBackgroundColors() {
         this.setState({
             currentForegroundColor: this.state.currentBackgroundColor,
-            currentBackgroundColor: this.state.currentForegroundColor
+            currentBackgroundColor: this.state.currentForegroundColor,
+            shortcutSequence: ''
         })
     }
     renderNewCanvas() {
@@ -186,7 +250,7 @@ export default class App extends Component {
             {x: this.state.canvasColumns, y: this.state.canvasRows}
         )
 
-        console.log(TOKENS)
+        // console.log(TOKENS)
     }
     selectionCleanup() {
         return {
@@ -209,15 +273,8 @@ export default class App extends Component {
             canvasColumns: +width
         }, this.renderNewCanvas )
     }
-    updateCommandsDisplay(list) {
-        const APP = list.reduce((a,b) => {
-            b.map(e => {
-                a[e.hex] = e.command
-            })
-            return a
-        }, {})
-
-        console.log(APP)
+    updateHistory(nextState) {
+        this.setState(nextState)
     }
 
     render() {
@@ -240,7 +297,6 @@ export default class App extends Component {
                     updateCanvasCellSize =                { this.updateCanvasCellSize }
                     updateCanvasHeight =                  { this.updateCanvasHeight }
                     updateCanvasWidth =                   { this.updateCanvasWidth }
-                    updateCommandsDisplay =               { this.updateCommandsDisplay }
                 />
                 <Canvas 
                     cellSize =        { this.state.cellSize }

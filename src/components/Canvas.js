@@ -26,7 +26,7 @@ export default class Canvas extends Component {
                         onClick={ e => this.props.handleTileClick(i,j,e.shiftKey) }
                         className="canvas--tile" 
                         style={STYLES}
-                        onMouseOver={ () => this.props.onMouseOverTile({ x: j, y: i }) }
+                        onMouseOver={ e => this.props.onMouseOverTile({ x: j, y: i }, e) }
                         onMouseOut={ () => this.props.onMouseExitTile() }
                     >
                     </div>
