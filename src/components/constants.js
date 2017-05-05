@@ -27,6 +27,29 @@ export const COLORS = {
     white:        '#FFF'
 }
 
+export const COLORS_BY_SHORTCUT = {
+    lr: 'lightRed',
+    mr: 'midRed',
+    dr: 'darkRed',
+    ly: 'lightYellow',
+    my: 'midYellow',
+    dy: 'darkYellow',
+    lg: 'lightGreen',
+    mg: 'midGreen',
+    dg: 'darkGreen',
+    lc: 'lightCyan',
+    mc: 'midCyan',
+    dc: 'darkCyan',
+    lb: 'lightBlue',
+    mb: 'midBlule',
+    db: 'darkBlue',
+    lm: 'lightMagenta',
+    mm: 'midMagenta',
+    dm: 'darkMagenta',
+    bl: 'black',
+    wh: 'white'
+}
+
 export const COLORS_ARRAY = (() => 
     Object.keys(COLORS).reduce((a,b) => {
         if (a[a.length - 1].length >= 3) {

@@ -95,10 +95,14 @@ $sidebar--margin: 5px;
     top: 50%;
     height: 75%;
     transition: left 400ms, border-right 10ms, width 400ms, height 400ms;
+    transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     transform: translateY(-50%);
     background-color: white;
     padding-bottom: 20px;
     box-sizing: border-box;
+    border-right-color: white;
+    border-right-style: solid;
+    border-right-width: 3px;
     z-index: -1;
     box-shadow: 10px 0 30px 0 rgba(0,0,0,0.5);
     @include flex(center, flex-start, column);
@@ -113,8 +117,10 @@ $sidebar--margin: 5px;
     & div { 
         font-family: monospace;
         font-size: 12px;
-        overflow: scroll;
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 90%;
+        height: 90%;
         box-sizing: border-box;
     }
     &::before {

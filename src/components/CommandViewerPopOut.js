@@ -5,7 +5,7 @@ import { COMMAND_DESCRIPTIONS } from './constants'
 export default props => {
     const STYLES = {
         left: props.infoModalIsVisible ? '100%' : '7px',
-        borderRight: '3px solid' + props.currentColor,
+        borderRight: '3px solid' + props.currentColor || '#FFF',
         width: props.infoModalIsVisible ? '350px' : '100%',
         height: props.infoModalIsVisible ? '100%' : '75%'
     }
@@ -21,20 +21,27 @@ export default props => {
               EASE_IN              = 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
               EASE_OUT             = 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
 
+        let count = 0
+
         if (IS_BORDER_TRANSITION) {
             if (MODAL_IS_HIDDEN) {
+                console.log(`1`)
                 e.target.style.zIndex = -1
                 e.target.style.transitionTimingFunction = EASE_OUT
             } else {
+                console.log(`2`)
                 e.target.style.transitionTimingFunction = EASE_IN
             }
         } else if (IS_LEFT_TRANSITION) {
             if (!MODAL_IS_HIDDEN) {
+                console.log(`3`)
                 e.target.style.zIndex = 1
             } else {
+                console.log(`4`)
                 props.onModalTransitionEnd()
             }
         }
+        console.log('end', e.propertyName)
     }
 
     return (

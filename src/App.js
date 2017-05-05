@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 import Canvas from './components/Canvas'
 import ToolBar from './components/ToolBar'
-import { tokenize } from './Tokenizer'
+import { tokenize, gatherColorGroup } from './Tokenizer'
 import { 
     COMMANDS, 
     COLORS_ARRAY, 
@@ -39,6 +39,7 @@ export default class App extends Component {
             'destroySelection',
             'executeShortcut',
             'forgroundAndBackgroundColorsToDefault',
+            'handleGroupSelection',
             'handleSelectionAction',
             'handleSelectionClick',
             'handleTileClick',
@@ -148,6 +149,18 @@ export default class App extends Component {
             shortcutSequence: ''
         })
     }
+    handleGroupSelection(i,j) {
+        const TILES = this.state.tiles,
+              SELECTED_TILES = gatherColorGroup(i,j,TILES)
+
+        SELECTED_TILES.map(t => {
+            const [ X,Y ] = t.split(':')
+
+            TILES[+Y][+X].color = this.state.currentForegroundColor
+        })
+
+        return { tiles: TILES }
+    }
     handleSelectionAction(i,j) {
         const CLICK_IS_IN_SELECTION = this.state.selectedTiles.includes(`${i}:${j}`)
         
@@ -166,12 +179,15 @@ export default class App extends Component {
             selectedTiles: this.state.selectedTiles.concat([`${i}:${j}`])
         }
     }
-    handleTileClick(i,j, shiftKey) {
-        const NEXT_STATE = shiftKey ?
-                               this.handleSelectionClick(i,j) :
-                               this.state.inSelection ?
-                                   this.handleSelectionAction(i,j) :
-                                   this.addColorIntoTile(i,j)
+    handleTileClick(i,j, shiftKey, altKey) {
+        const NEXT_STATE = altKey ?
+                                this.handleGroupSelection(i,j) :
+                                shiftKey ?
+                                   this.handleSelectionClick(i,j) :
+                                   this.state.inSelection ?
+                                       this.handleSelectionAction(i,j) :
+                                       this.addColorIntoTile(i,j)
+
 
         this.updateHistory(NEXT_STATE)
     }

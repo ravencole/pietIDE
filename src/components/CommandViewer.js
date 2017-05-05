@@ -35,7 +35,7 @@ export default class CommandViewer extends Component {
         this.state = {
             infoModalIsVisible: false,
             currentInfoTopic: '',
-            currentColor: this.props.currentForegroundColor
+            currentColor: this.props.currentForegroundColor || '#FFF'
         }
 
         this.renderCommandArray = this.renderCommandArray.bind(this)
@@ -44,7 +44,7 @@ export default class CommandViewer extends Component {
         this.onModalTransitionEnd = this.onModalTransitionEnd.bind(this)
     }
     componentWillReceiveProps(nextProps) {
-       if ( !this.state.infoModalIsVisible && this.state.currentColor !== nextProps.currentForegroundColor) {
+       if ( !this.state.infoModalIsVisible && this.state.currentColor !== nextProps.currentForegroundColor ) {
             this.setState({
                 currentColor: nextProps.currentForegroundColor
             })
@@ -68,11 +68,14 @@ export default class CommandViewer extends Component {
     }
     alignCommandSet(hue, lightness) {
         return colors => {
+
+            // Vertically shift array
             while (colors[0][0].hue !== hue) {
                 const tmp = colors.shift()
                 colors.push(tmp)
             }
 
+            // Horizontally shift array
             while(colors[0][0].lightness !== lightness) {
                 colors.map(e => {
                     const tmp = e.shift()
@@ -105,14 +108,13 @@ export default class CommandViewer extends Component {
         })
     }
     onInfoClick(command, hex) {
-        // if (command === this.state.currentInfoTopic) 
-        //     return this.onInfoClose()
-
-        this.setState({
-            infoModalIsVisible: true,
-            currentInfoTopic: command,
-            currentColor: hex
-        })
+        if (this.state.currentColor !== '#FFF' && this.state.currentColor !== '#000') {
+            this.setState({
+                infoModalIsVisible: true,
+                currentInfoTopic: command,
+                currentColor: hex
+            })
+        }
     }
     onInfoClose() {
         this.setState({

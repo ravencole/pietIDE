@@ -1,6 +1,8 @@
-const defaultCodelObj = (i,j) => {
+import { COLORS, COLORS_BY_SHORTCUT } from '../src/components/constants'
+
+const defaultCodelObj = (i, j, color) => {
     return {
-        color: '#FFF',
+        color: color || '#FFF',
         loc: {
             x: j,
             y: i
@@ -8,27 +10,36 @@ const defaultCodelObj = (i,j) => {
     }
 }
 
-export const mockSource = (height, width, srcStarter) => {
-    if (!srcStarter) {
-        return [...Array(height)].map((_,i) => {
-            return [...Array(width)].map((_,j) => {
-                return defaultCodelObj(i,j)
+export const mockSource = (height, width, src) => {
+    if (!src) {
+        return [...Array(height)].map((row, i) => {
+            return [...Array(width)].map((col, j) => {
+                return {
+                    color: '#FFF',
+                    x: j,
+                    y: i
+                }
             })
         })
     }
+    
+    const NEW_SRC = src.concat([...Array(height - src.length)].map(_ => [...Array(width)]))
 
-    const newSrc = srcStarter.concat([...Array(height - srcStarter.length)]).map((row,i) => {
-        if (!row) {
-            row = [...Array(width)]
-        } else if (row.length < width) {
-            row = row.concat([...Array(width - row.length)])
+    return NEW_SRC.map((row,i) => {
+        while (row.length < width) {
+            row.push(undefined)
         }
 
-        return row.map((col,j) => {
-            if (col) return col
-            return defaultCodelObj(i,j)
+        return row.map((tile,j) => {
+            const color = tile && COLORS_BY_SHORTCUT.hasOwnProperty(tile) ?
+                            COLORS[COLORS_BY_SHORTCUT[tile]] :
+                            '#FFF'
+
+            return {
+                color,
+                x: j,
+                y: i
+            }
         })
     })
-
-    return newSrc
 }

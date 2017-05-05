@@ -3,3 +3,4 @@
 --growl
 --reporter spec
 --recursive
+--require babel-polyfill

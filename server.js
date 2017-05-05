@@ -4,6 +4,8 @@ import path from 'path';
 import config from './webpack.config.dev';
 import open from 'open';
 
+require('babel-polyfill')
+
 require('dotenv').config({path: './.env'});
 
 const app = express();
