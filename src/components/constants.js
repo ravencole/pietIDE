@@ -41,7 +41,7 @@ export const COLORS_BY_SHORTCUT = {
     mc: 'midCyan',
     dc: 'darkCyan',
     lb: 'lightBlue',
-    mb: 'midBlule',
+    mb: 'midBlue',
     db: 'darkBlue',
     lm: 'lightMagenta',
     mm: 'midMagenta',
@@ -66,6 +66,12 @@ export const COLORS_ARRAY = (() =>
         return a
     }, [[]])
 )()
+
+export const COLORS_ARRAY_NO_BW = (() => {
+    const CANBW = COLORS_ARRAY
+    CANBW.pop()
+    return CANBW
+})()
 
 export const COLORS_BY_HEX = Object.keys(COLORS).reduce((a,b) => {
     a[COLORS[b]] = b
@@ -105,6 +111,11 @@ export const COMMANDS = [
         'out(char)'
     ]
 ]
+
+export const FLATTENED_COMMANDS = COMMANDS.reduce((a,b) => {
+    b.map(command => a.push(command))
+    return a
+}, [])
 
 export const COMMANDS_WITH_INDEX = COMMANDS.reduce((a,b,i) => {
     b.map((command,j) => {

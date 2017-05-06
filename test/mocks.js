@@ -23,6 +23,9 @@ export const mockSource = (height, width, src) => {
         })
     }
     
+    if (src.length > height || src[0].length > width)
+        return src
+
     const NEW_SRC = src.concat([...Array(height - src.length)].map(_ => [...Array(width)]))
 
     return NEW_SRC.map((row,i) => {
@@ -31,10 +34,17 @@ export const mockSource = (height, width, src) => {
         }
 
         return row.map((tile,j) => {
-            const color = tile && COLORS_BY_SHORTCUT.hasOwnProperty(tile) ?
-                            COLORS[COLORS_BY_SHORTCUT[tile]] :
-                            '#FFF'
-
+            let color;
+            if (tile && COLORS_BY_SHORTCUT.hasOwnProperty(tile)) {
+                const c = COLORS[COLORS_BY_SHORTCUT[tile]]
+                if (c === undefined) {
+                    throw new Error(`tile: ${tile}`)
+                } else {
+                    color = c
+                }
+            } else {
+                color = '#FFF'
+            }
             return {
                 color,
                 x: j,
