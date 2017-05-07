@@ -697,7 +697,7 @@ describe('Interpreter', () => {
       let haltProgram = false,
           count = 0
 
-      while(count < 40 || !haltProgram) {
+      while(!haltProgram) {
         const res = INTERPRETER.step()
         // console.log('STACK',INTERPRETER.stack)
         // console.log('DP',INTERPRETER.dp)
