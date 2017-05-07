@@ -519,6 +519,7 @@ describe('Interpreter', () => {
 
           assert.deepEqual(EXPECTED, ACTUAL)
       })
+      // TODO handle negative numbers
     })
     describe('switchOperation', () => {
       it('shift the top value from the stack and toggle the cc that many times', () => {
@@ -698,15 +699,15 @@ describe('Interpreter', () => {
 
       while(count < 40 || !haltProgram) {
         const res = INTERPRETER.step()
-        console.log('STACK',INTERPRETER.stack)
-        console.log('DP',INTERPRETER.dp)
-        console.log('previousCommand',INTERPRETER.previousCommand)
-        console.log('CC',INTERPRETER.cc)
-        console.log('tmpRegister',INTERPRETER.tmpRegister)
-        console.log('previousColor',INTERPRETER.previousColor)
-        console.log('operationPoint',INTERPRETER.operationPoint)
-        console.log('attemptedMoves', INTERPRETER.attemptedMoves)
-        console.log(`${count} ___________________________________________`)
+        // console.log('STACK',INTERPRETER.stack)
+        // console.log('DP',INTERPRETER.dp)
+        // console.log('previousCommand',INTERPRETER.previousCommand)
+        // console.log('CC',INTERPRETER.cc)
+        // console.log('tmpRegister',INTERPRETER.tmpRegister)
+        // console.log('previousColor',INTERPRETER.previousColor)
+        // console.log('operationPoint',INTERPRETER.operationPoint)
+        // console.log('attemptedMoves', INTERPRETER.attemptedMoves)
+        // console.log(`${count} ___________________________________________`)
         count++
         haltProgram = res.halt
       }
@@ -727,8 +728,8 @@ describe('Interpreter', () => {
               ['mr','dr','wh','wh','mr','dr','lr','my','dy','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], // 0
               ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 1
               ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
-              ['wh','wh','wh','wh','wh','bl','bl','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 3
-              ['wh','wh','wh','wh','bl','mg','mg','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 4
+              ['mr','wh','wh','wh','wh','bl','bl','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 3
+              ['mr','wh','wh','wh','bl','mg','mg','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 4
               ['wh','wh','wh','wh','wh','bl','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 5
               ['bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
               ['mg','wh','mr','mr','mr','dr','lc','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
@@ -748,27 +749,74 @@ describe('Interpreter', () => {
             ]),
             INTERPRETER = new Interpreter(SRC)
 
-      const EXPECTED = [0,5,3]
+      const EXPECTED = [0,13,8]
 
       let count = 0,
           haltProgram = false
 
       while(!haltProgram) {
         const res = INTERPRETER.step()
-        console.log('STACK',INTERPRETER.stack)
-        console.log('DP',INTERPRETER.dp)
-        console.log('previousCommand',INTERPRETER.previousCommand)
-        console.log('CC',INTERPRETER.cc)
-        console.log('tmpRegister',INTERPRETER.tmpRegister)
-        console.log('previousColor',INTERPRETER.previousColor)
-        console.log('operationPoint',INTERPRETER.operationPoint)
-        console.log('attemptedMoves', INTERPRETER.attemptedMoves)
-        console.log(`${count} ___________________________________________`)
+        // console.log('STACK',INTERPRETER.stack)
+        // console.log('DP',INTERPRETER.dp)
+        // console.log('previousCommand',INTERPRETER.previousCommand)
+        // console.log('CC',INTERPRETER.cc)
+        // console.log('tmpRegister',INTERPRETER.tmpRegister)
+        // console.log('previousColor',INTERPRETER.previousColor)
+        // console.log('operationPoint',INTERPRETER.operationPoint)
+        // console.log('attemptedMoves', INTERPRETER.attemptedMoves)
+        // console.log(`${count} ___________________________________________`)
         count++
         haltProgram = res.halt
       }
 
       assert.deepEqual(EXPECTED,INTERPRETER.stack)
+    })
+    it('can run a program that uses all non IO operations', () => {
+       const SRC = mockSource(0,0,[
+              // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
+              ['mr','dr','lr','mr','dr','lr','mr','my','lg','lr','lb','lm','mm','dm','lc','lm','wh','wh','wh','mg'], // 0
+              ['mr','dr','lr','mr','dr','wh','wh','wh','wh','wh','wh','lm','wh','wh','wh','wh','wh','wh','wh','wh'], // 1
+              ['mr','dr','lr','mr','wh','wh','wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
+              ['mr','dr','lr','wh','wh','wh','wh','wh','mg','wh','wh','wh','mg','bl','wh','wh','wh','wh','wh','wh'], // 3
+              ['mr','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dg','wh','wh','wh','wh','wh','wh','wh'], // 4
+              ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mm','wh','wh','wh','wh','wh','wh','wh'], // 5
+              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
+              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
+              ['wh','bl','bl','bl','wh','wh','wh','wh','dm','mg','wh','wh','wh','wh','wh','wh','dr','mr','wh','mg'], // 8
+              ['bl','mg','mg','mg','bl','wh','wh','wh','bl','wh','wh','wh','mg','mg','mg','wh','wh','wh','wh','bl'], // 9
+              // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
+              ['wh','bl','wh','bl','wh','wh','wh','wh','mg','wh','mg','bl','mg','mg','mg','wh','wh','wh','wh','wh'], // 10
+              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','wh','wh','wh','wh','wh'], // 11
+              ['wh','bl','lr','mr','dr','lr','mr','wh','wh','wh','mg','wh','mg','wh','mg','wh','wh','wh','wh','wh'], // 12
+              ['wh','wh','wh','wh','wh','wh','wh','wh','mb','wh','bl','wh','dc','wh','wh','wh','wh','wh','wh','wh'], // 13
+              ['wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','lm','wh','mg','wh','wh','wh','wh','wh'], // 14
+              ['wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','mm','wh','wh','wh','wh','wh','wh','wh'], // 15
+              ['wh','wh','wh','wh','wh','wh','wh','wh','dr','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh'], // 16
+              ['wh','wh','wh','mr','mr','mr','mr','mr','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 17
+              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 18
+              ['wh','wh','bl','mg','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh']  // 19
+             ]),
+             INTERPRETER = new Interpreter(SRC),
+             EXPECTED = [6]
+
+      let count = 0,
+          halt = false
+
+      while(!halt) {
+        const res = INTERPRETER.step()
+        // console.log('STACK          ',INTERPRETER.stack)
+        // console.log('previousCommand',INTERPRETER.previousCommand)
+        // console.log('previousColor  ',INTERPRETER.previousColor)
+        // console.log('DP             ',INTERPRETER.dp)
+        // console.log('CC             ',INTERPRETER.cc)
+        // console.log('operationPoint ',INTERPRETER.operationPoint)
+        // console.log('step           ',INTERPRETER.currentStep)
+        // console.log('----------------------------------------')
+        halt = res.halt
+        count++
+      }
+
+      assert.deepEqual(EXPECTED, INTERPRETER.stack)
     })
   })
 })

@@ -23,10 +23,11 @@ export const mockSource = (height, width, src) => {
         })
     }
     
-    if (src.length > height || src[0].length > width)
-        return src
-
-    const NEW_SRC = src.concat([...Array(height - src.length)].map(_ => [...Array(width)]))
+    let NEW_SRC;
+    if (src.length >= height)
+        NEW_SRC = src
+    else
+        NEW_SRC = src.concat([...Array(height - src.length)].map(_ => [...Array(width)]))
 
     return NEW_SRC.map((row,i) => {
         while (row.length < width) {

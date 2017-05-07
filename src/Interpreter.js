@@ -363,7 +363,7 @@ export default class Interpreter {
               CURRENT_COLOR_NAME = COLORS_BY_HEX[CURRENT_COLOR_HEX]
 
         if (!CURRENT_COLOR_NAME) {
-            console.log(this.src[this.operationPoint[1]])
+            console.log(this.src[this.operationPoint[1]][this.operationPoint[0]])
             throw new Error([
 
               `\n           Y: ${this.operationPoint[1]}`,
@@ -385,7 +385,7 @@ export default class Interpreter {
         this.tmpRegister = PIXEL_GROUP.length
         this.previousColor = CURRENT_COLOR_NAME
         this.operationPoint = this.getNextOperationPoint(EXIT_NODE, PIXEL_GROUP)
-
+        this.currentStep += 1
 
         if (this.attemptedMoves === 8) {
             return {
