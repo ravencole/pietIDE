@@ -21,6 +21,7 @@ export default class Interpreter {
         this.previousColor   = 'white'
         this.operationPoint  = [0,0]
         this.previousCommand = 'no op'
+        this.waitingForIO    = false
     }
     addOperation() {
         const FIRST_NUM  = this.stack.shift(),
@@ -63,11 +64,11 @@ export default class Interpreter {
     }
     executeOperation(operation) {
         if (!this.operationIsValid(operation))
-            return
+            throw new Error(`${operation} is not a valid operation`)
 
         const OP = operation.replace(/\(|\)/g, '')
 
-        this[`${OP}Operation`]()
+        return this[`${OP}Operation`]()
     }
     findDownExitNode(pixelGroup) {
         return pixelGroup.reduce((a,b) => {
@@ -96,6 +97,10 @@ export default class Interpreter {
         const SECOND = this[this.findExitNodeFunc()](pixelGroup)
 
         this.cc = (this.cc + 1) % 2
+
+        if (this.hasBlackTileInNextMove(FIRST) && this.hasColoredTileInNextMove(SECOND)) {
+            return SECOND
+        }
 
         if (this.hasBlackTileInNextMove(FIRST) || this.hasColoredTileInDirection(FIRST)) {
             return FIRST
@@ -386,6 +391,42 @@ export default class Interpreter {
 
         return false
     }
+    hasColoredTileInNextMove(tile) {
+        const [X,Y] = tile.map(n => +n)
+
+        if (this.dp === 0 && X+1 < this.src[0].length) {
+            return this.src[Y][X+1].color !== '#000' && this.src[Y][X+1].color !== '#FFF'
+        } else if (this.dp === 1 && Y+1 < this.src.length) {
+            return this.src[Y+1][X].color !== '#000' && this.src[Y+1][X].color !== '#FFF'
+        } else if (this.dp === 2 && X-1 > -1) {
+            return this.src[Y][X-1].color !== '#000' && this.src[Y][X-1].color !== '#FFF'
+        } else if (this.dp === 3 && Y-1 > -1) {
+            return this.src[Y-1][X].color !== '#000' && this.src[Y-1][X].color !== '#FFF'
+        }
+
+        return false
+    }
+    incharOperation() {
+        this.waitingForIO = true
+        const prompt = input => {
+            if (input === undefined)
+                throw new Error(`a valid input is required`)
+
+            this.stack.unshift(input.charCodeAt(0))
+            this.waitingForIO = false
+        }
+
+        return { prompt }
+    }
+    innumberOperation() {
+        this.waitingForIO = true
+        const prompt = input => {
+            this.stack.unshift(+input)
+            this.waitingForIO = false
+        }
+
+        return { prompt }
+    }
     run() {
         
     }
@@ -414,6 +455,24 @@ export default class Interpreter {
         return operation &&
                operation.trim().length > 0 &&
                FLATTENED_COMMANDS.includes(operation)
+    }
+    outcharOperation() {
+        const OUTPUT = this.stack.shift()
+
+        if (OUTPUT !== undefined) {
+            return {
+                output: String.fromCharCode(OUTPUT)
+            }
+        }
+    }
+    outnumberOperation() {
+        const OUTPUT = this.stack.shift()
+
+        if (OUTPUT !== undefined) {
+            return {
+                output: `${OUTPUT}`
+            }
+        }
     }
     // TODO -- pointerOperation is sloppy
     pointerOperation() {
@@ -477,6 +536,10 @@ export default class Interpreter {
             this.previousCommand = 'no op'
         }
 
+        if (this.waitingForIO) {
+            throw new Error(`step cannot be called before fulfilling IO obligations`)
+        }
+
         const PIXEL_GROUP        = this.getColorGroup(...this.operationPoint),
               CURRENT_COLOR_HEX  = this.src[this.operationPoint[1]][this.operationPoint[0]].color,
               CURRENT_COLOR_NAME = COLORS_BY_HEX[CURRENT_COLOR_HEX]
@@ -495,10 +558,28 @@ export default class Interpreter {
             ].join("\n"))
         }
 
-        const COMMAND            = this.getCommandFromColor(this.previousColor, CURRENT_COLOR_NAME)
+        const COMMAND = this.getCommandFromColor(this.previousColor, CURRENT_COLOR_NAME) || 'no op',
+              RESPONSE = {}
 
         if (COMMAND !== 'no op') {
-            this.executeOperation(COMMAND)
+            const IO = this.executeOperation(COMMAND)
+
+            if (
+                IO !== null && 
+                typeof IO === 'object' && 
+                IO.hasOwnProperty('prompt') &&
+                typeof IO.prompt === 'function'
+            ) {
+                RESPONSE.prompt = IO.prompt
+            }
+
+            if (
+                IO !== null &&
+                typeof IO === 'object' &&
+                IO.hasOwnProperty('output')
+            ) {
+                RESPONSE.output = IO.output
+            }
         }
 
         const EXIT_NODE = this.findExitNode(PIXEL_GROUP)
@@ -510,15 +591,16 @@ export default class Interpreter {
         this.currentStep += 1
 
         if (this.attemptedMoves === 8) {
-            return {
-                halt: true,
-                stack: this.stack
-            }
+            RESPONSE.halt = true,
+            RESPONSE.stack = this.stack
+            
+            return RESPONSE
         }
-        return {
-            halt: false,
-            stack: this.stack
-        }
+        
+        RESPONSE.halt = false
+        RESPONSE.stack = this.stack
+
+        return RESPONSE
     }
     switchOperation() {
         const TOGGGLE_AMOUNT = this.stack.shift()

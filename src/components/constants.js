@@ -103,11 +103,11 @@ export const COMMANDS = [
     [
         'duplicate',
         'roll',
-        'in(int)'
+        'in(number)'
     ],
     [
         'in(char)',
-        'out(int)',
+        'out(number)',
         'out(char)'
     ]
 ]

@@ -11,6 +11,7 @@ const fullProgramDebug = _interpreter => {
   console.log('CC             ',_interpreter.cc)
   console.log('operationPoint ',_interpreter.operationPoint)
   console.log('step           ',_interpreter.currentStep)
+  console.log('tmpRegister    ',_interpreter.tmpRegister)
   console.log('----------------------------------------')
 }
 
@@ -587,6 +588,64 @@ describe('Interpreter', () => {
           assert.deepEqual(EXPECTED, ACTUAL)
       })
     })
+    describe('incharOperation', () => {
+      it('prompts for input from the front end', () => {
+          const SRC = mockSource(20,20),
+                INTERPRETER = new Interpreter(SRC)
+
+          const PROMPT = INTERPRETER.executeOperation('in(char)').prompt
+          PROMPT('a')
+
+          const EXPECTED = [97],
+                ACTUAL = INTERPRETER.stack
+
+          assert.deepEqual(EXPECTED, ACTUAL)
+      })
+    })
+    describe('innumberOperation', () => {
+      it('prompts the front end for a number', () => {
+          const SRC = mockSource(20,20),
+                INTERPRETER = new Interpreter(SRC)
+                
+          const PROMPT = INTERPRETER.executeOperation('in(number)').prompt
+          PROMPT('33')
+
+          const EXPECTED = [33],
+                ACTUAL = INTERPRETER.stack  
+
+          assert.deepEqual(EXPECTED, ACTUAL)
+      })
+    })
+    describe('outcharOperation', () => {
+      it('outputs a char value to the front end', () => {
+        const SRC = mockSource(20,20),
+              INTERPRETER = new Interpreter(SRC)
+
+        INTERPRETER.stack = [97,4,3,2,1]
+
+        const RES = INTERPRETER.executeOperation('out(char)').output,
+              EXPECTED = [4,3,2,1],
+              ACTUAL = INTERPRETER.stack
+
+        assert.equal('a',RES)
+        assert.deepEqual(EXPECTED,ACTUAL)
+      })
+    })
+    describe('outnumberOperation', () => {
+      it('outputs a number value to the front end', () => {
+        const SRC = mockSource(20,20),
+              INTERPRETER = new Interpreter(SRC)
+
+        INTERPRETER.stack = [97,4,3,2,1]
+
+        const RES = INTERPRETER.executeOperation('out(number)').output,
+              EXPECTED = [4,3,2,1],
+              ACTUAL = INTERPRETER.stack
+
+        assert.equal(97,RES)
+        assert.deepEqual(EXPECTED,ACTUAL)
+      })
+    })
   })
   describe('getNextOperationPoint', () => {
     it('can get the next point when the direction and codel do not have to change', () => {
@@ -857,12 +916,177 @@ describe('Interpreter', () => {
 
       while(!halt) {
         const res = INTERPRETER.step()
-        fullProgramDebug(INTERPRETER)
+        // fullProgramDebug(INTERPRETER)
         halt = res.halt
         count++
       }
 
       assert.deepEqual(EXPECTED, INTERPRETER.stack)
     })
+    it('can run a program that uses the in(char) IO operation', () => {
+      const SRC = mockSource(20,20,[
+              ['mc','mg','mr','my']
+            ]),
+            INTERPRETER = new Interpreter(SRC)
+
+      let count = 0
+
+      while(count < 4) {
+        const res = INTERPRETER.step()
+        if (res.hasOwnProperty('prompt')) {
+          res.prompt('g')
+        }
+        count++
+      }
+
+      const EXPECTED = [206],
+            ACTUAL = INTERPRETER.stack
+
+      assert.deepEqual(EXPECTED, ACTUAL)
+        
+    })
+    it('throws an error when step is called but IO obligations are not fulfilled', () => {
+      assert.throws(ignoreInCharIOFunc)
+    })
+    it('can run a simple program that uses all IO operations', () => {
+      const SRC = mockSource(20,20,[
+              ['mc','ly','lr','dm','lb']
+            ]),
+            INTERPRETER = new Interpreter(SRC),
+            INPUTS = ['6','s'],
+            OUTPUT = []
+
+      let count = 0
+
+      while(count < 5) {
+        const RES = INTERPRETER.step()
+
+        if (RES.hasOwnProperty('prompt')) {
+          RES.prompt(INPUTS.shift())
+        }
+
+        if (RES.output) {
+          OUTPUT.push(RES.output)
+        }
+
+        count++
+      }
+
+      const EXPECTED = ['s','6']
+
+      assert.deepEqual(EXPECTED, OUTPUT)
+    })
+    it('runs a program with complicated IO', () => {
+        const SRC = mockSource(20,40,[
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32  
+                ['mr','mr','dr','lr','dy','dm','wh','mc','mg','mr','wh','mr','dr','lr','mb','dm','my','db','mb','lb','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], //  0
+                ['mr','mr','dr','wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','bl','bl','wh','wh','wh'], //  1
+                ['mr','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','mg','mg','mg','bl','wh','wh'], //  2
+                ['mr','mr','dm','mg','wh','wh','wh','wh','mm','my','lr','dr','mr','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','bl','wh','wh','wh'], //  3
+                ['mr','mr','wh','bl','bl','bl','bl','bl','bl','bl','bl','dr','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','ly','wh','wh','wh','wh'], //  4
+                ['mr','mr','wh','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','wh','wh','wh','wh'], //  5
+                ['mr','mr','mg','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','my','my','wh','wh','wh'], //  6
+                ['mr','mr','dm','wh','mr','my','mm','mc','mc','mc','dc','lb','dc','dc','lc','lb','dc','dc','dc','dc','dc','dc','lc','lb','dc','lc','mc','db','ly','wh','wh','wh','wh'], //  7
+                ['mr','mr','wh','wh','wh','wh','wh','mc','mc','mc','bl','bl','dc','dc','bl','bl','dc','dc','dc','dc','dc','dc','wh','wh','wh','lc','wh','wh','wh','wh','wh','wh','wh'], //  8
+                ['mr','mr','wh','wh','wh','wh','wh','mc','mc','mc','bl','bl','dc','dc','bl','bl','dc','dc','dc','dc','dc','dc','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  9
+                ['mr','mr','wh','wh','wh','wh','wh','mc','mc','mc','bl','bl','dc','dc','bl','bl','dc','dc','dc','dc','dc','dc','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 10
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32 
+                ['mr','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 11
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 12
+                ['mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh'], // 13
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh']  // 14
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              INPUTS      = ['a','b','5','G','M','6','b','a','d','l','a','n','d','s','0'],
+              OUTPUT      = []
+
+      let count = 0,
+          halt = false
+
+      while(!halt) {
+        const RES = INTERPRETER.step()
+
+        if (RES.hasOwnProperty('prompt')) {
+          RES.prompt(INPUTS.shift())
+        }
+
+        if (RES.output) {
+          OUTPUT.push(RES.output)
+        }
+
+        // fullProgramDebug(INTERPRETER)
+
+        halt = RES.halt
+        count++
+      }
+
+      const EXPECTED = ['T','h','x'],
+            ACTUAL = OUTPUT
+
+      assert.deepEqual(EXPECTED, ACTUAL)
+    })
+    it('runs a program with complicated IO and lots of black squares', () => {
+        const SRC = mockSource(20,40,[
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32  
+                ['mr','mr','dr','lr','dy','dm','wh','mc','mg','mr','wh','mr','dr','lr','mb','dm','my','db','mb','lb','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], //  0
+                ['mr','mr','dr','bl','bl','bl','bl','bl','bl','bl','bl','mr','bl','bl','bl','bl','bl','wh','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','wh','bl'], //  1
+                ['mr','mr','bl','bl','bl','bl','bl','bl','bl','bl','bl','mr','bl','bl','bl','bl','bl','wh','bl','bl','bl','bl','bl','bl','bl','bl','bl','mg','mg','mg','bl','wh','bl'], //  2
+                ['mr','mr','dm','mg','wh','wh','wh','wh','mm','my','lr','dr','mr','wh','wh','wh','wh','mg','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','wh','bl','bl','wh','bl'], //  3
+                ['mr','mr','wh','bl','bl','bl','bl','bl','bl','bl','bl','dr','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','ly','bl','bl','wh','bl'], //  4
+                ['mr','mr','wh','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','bl','bl','wh','bl'], //  5
+                ['mr','mr','mg','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','dy','my','my','bl','wh','bl'], //  6
+                ['mr','mr','dm','wh','mr','my','mm','mc','mc','mc','dc','lb','dc','dc','lc','lb','dc','dc','dc','dc','dc','dc','lc','lb','dc','lc','mc','db','ly','bl','bl','wh','bl'], //  7
+                ['mr','mr','bl','bl','bl','bl','bl','mc','mc','mc','bl','bl','dc','dc','bl','bl','dc','dc','dc','dc','dc','dc','bl','bl','bl','lc','bl','bl','bl','bl','bl','wh','bl'], //  8
+                ['mr','mr','bl','bl','bl','bl','bl','mc','mc','mc','bl','bl','dc','dc','bl','bl','dc','dc','dc','dc','dc','dc','bl','bl','bl','bl','bl','bl','bl','bl','bl','wh','bl'], //  9
+                ['mr','mr','bl','bl','bl','bl','bl','mc','mc','mc','bl','bl','dc','dc','bl','bl','dc','dc','dc','dc','dc','dc','bl','bl','bl','bl','bl','bl','bl','bl','bl','wh','bl'], // 10
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32 
+                ['mr','mr','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','wh','bl'], // 11
+                ['wh','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','wh','bl'], // 12
+                ['mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], // 13
+                ['bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl','bl']  // 14
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              INPUTS      = ['a','b','5','G','M','6','b','a','d','l','a','n','d','s','0'],
+              OUTPUT      = []
+
+      let count = 0,
+          halt = false
+
+      while(!halt) {
+        const RES = INTERPRETER.step()
+
+        if (RES.hasOwnProperty('prompt')) {
+          RES.prompt(INPUTS.shift())
+        }
+
+        if (RES.output) {
+          OUTPUT.push(RES.output)
+        }
+
+        // fullProgramDebug(INTERPRETER)
+
+        halt = RES.halt
+        count++
+      }
+
+      const EXPECTED = ['T','h','x'],
+            ACTUAL = OUTPUT
+
+      assert.deepEqual(EXPECTED, ACTUAL)
+    })
   })
 })
+
+const ignoreInCharIOFunc = _ => {
+  const SRC = mockSource(20,20,[
+              ['mc','mg','mr','my']
+            ]),
+            INTERPRETER = new Interpreter(SRC)
+
+  let count = 0
+
+  while(count < 5) {
+    INTERPRETER.step()
+    count++
+  }
+}
