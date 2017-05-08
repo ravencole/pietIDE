@@ -3,6 +3,17 @@ import { assert } from 'chai'
 import { mockSource } from './mocks'
 import Interpreter from '../src/Interpreter'
 
+const fullProgramDebug = _interpreter => {
+  console.log('STACK          ',_interpreter.stack)
+  console.log('previousCommand',_interpreter.previousCommand)
+  console.log('previousColor  ',_interpreter.previousColor)
+  console.log('DP             ',_interpreter.dp)
+  console.log('CC             ',_interpreter.cc)
+  console.log('operationPoint ',_interpreter.operationPoint)
+  console.log('step           ',_interpreter.currentStep)
+  console.log('----------------------------------------')
+}
+
 describe('Interpreter', () => {
     describe('getColorGroup', () => {
         it('gathers 1 square of color', () => {
@@ -519,7 +530,19 @@ describe('Interpreter', () => {
 
           assert.deepEqual(EXPECTED, ACTUAL)
       })
-      // TODO handle negative numbers
+      it('rotates the pointer counter clockwise when passed a negative number', () => {
+          const SRC = mockSource(20,20),
+                INTERPRETER = new Interpreter(SRC)
+                
+          INTERPRETER.stack = [-3,9,8,7,6,5,4,3,2,1]
+
+          INTERPRETER.executeOperation('pointer')
+
+          const EXPECTED = 1,
+                ACTUAL = INTERPRETER.dp  
+
+          assert.deepEqual(EXPECTED, ACTUAL)
+      })
     })
     describe('switchOperation', () => {
       it('shift the top value from the stack and toggle the cc that many times', () => {
@@ -699,23 +722,10 @@ describe('Interpreter', () => {
 
       while(!haltProgram) {
         const res = INTERPRETER.step()
-        // console.log('STACK',INTERPRETER.stack)
-        // console.log('DP',INTERPRETER.dp)
-        // console.log('previousCommand',INTERPRETER.previousCommand)
-        // console.log('CC',INTERPRETER.cc)
-        // console.log('tmpRegister',INTERPRETER.tmpRegister)
-        // console.log('previousColor',INTERPRETER.previousColor)
-        // console.log('operationPoint',INTERPRETER.operationPoint)
-        // console.log('attemptedMoves', INTERPRETER.attemptedMoves)
-        // console.log(`${count} ___________________________________________`)
+        // fullProgramDebug(INTERPRETER)
         count++
         haltProgram = res.halt
       }
-      // while(!haltProgram) {
-      //   const res = INTERPRETER.step()
-      //   count++
-      //   haltProgram = res.halt
-      // }
 
       const EXPECTED = [5,4,2,1],
             ACTUAL = INTERPRETER.stack
@@ -756,15 +766,7 @@ describe('Interpreter', () => {
 
       while(!haltProgram) {
         const res = INTERPRETER.step()
-        // console.log('STACK',INTERPRETER.stack)
-        // console.log('DP',INTERPRETER.dp)
-        // console.log('previousCommand',INTERPRETER.previousCommand)
-        // console.log('CC',INTERPRETER.cc)
-        // console.log('tmpRegister',INTERPRETER.tmpRegister)
-        // console.log('previousColor',INTERPRETER.previousColor)
-        // console.log('operationPoint',INTERPRETER.operationPoint)
-        // console.log('attemptedMoves', INTERPRETER.attemptedMoves)
-        // console.log(`${count} ___________________________________________`)
+        // fullProgramDebug(INTERPRETER)
         count++
         haltProgram = res.halt
       }
@@ -804,14 +806,58 @@ describe('Interpreter', () => {
 
       while(!halt) {
         const res = INTERPRETER.step()
-        // console.log('STACK          ',INTERPRETER.stack)
-        // console.log('previousCommand',INTERPRETER.previousCommand)
-        // console.log('previousColor  ',INTERPRETER.previousColor)
-        // console.log('DP             ',INTERPRETER.dp)
-        // console.log('CC             ',INTERPRETER.cc)
-        // console.log('operationPoint ',INTERPRETER.operationPoint)
-        // console.log('step           ',INTERPRETER.currentStep)
-        // console.log('----------------------------------------')
+        // fullProgramDebug(INTERPRETER)
+        halt = res.halt
+        count++
+      }
+
+      assert.deepEqual(EXPECTED, INTERPRETER.stack)
+    })
+    it('can run a program with advenced control flow', () => {
+        const SRC = mockSource(0,0,[
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36   37   38   39    
+                ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  0
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  1
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh','wh','mm','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  2
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh','mg','dg','lm','wh','wh','wh'], //  3
+                ['wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  4
+                ['wh','bl','wh','wh','wh','wh','bl','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  5
+                ['wh','mg','wh','mr','mb','mg','wh','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  6
+                ['wh','wh','wh','wh','wh','wh','bl','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mc','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  7
+                ['wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], //  8
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','wh','wh','wh'], //  9
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','wh','wh','wh'], // 10
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36   37   38   39 
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','mg','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','mg','wh','wh','mg','mg','mg','mg','wh','wh','wh'], // 11
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh'], // 12
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 13
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh'], // 14
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh','wh','wh','wh'], // 15
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','mg','bl','wh','wh','wh'], // 16
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 17
+                ['wh','lm','dg','dg','dg','mg','my','mr','wh','mg','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','mg'], // 18
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','mg','mg','mg','mg','mg','mg','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh','wh','wh','wh'], // 19
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 20
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36   37   38   39 
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 21
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 22
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dr','dr','wh','wh','wh','wh','wh','dr','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 23
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','lr','lr','lr','wh','wh','wh','wh','wh','wh','lr','wh','wh','bl','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg'], // 24
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','my','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl'], // 25
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','db','wh','wh','wh','wh','wh','wh','mr','dr','lr','my','db','wh','wh','wh','wh','wh','wh'], // 26
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 27
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 28
+                ['wh','wh','wh','wh','wh','wh','wh','wh','bl','mg','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh']  // 29
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              EXPECTED = [6,6,6]
+
+      let count = 0,
+          halt = false
+
+      while(!halt) {
+        const res = INTERPRETER.step()
+        fullProgramDebug(INTERPRETER)
         halt = res.halt
         count++
       }

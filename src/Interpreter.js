@@ -46,6 +46,8 @@ export default class Interpreter {
         return COLORS_ARR
     }
     divideOperation() {
+        if (this.stack.length < 2)
+            return
         const FIRST_NUM  = this.stack.shift(),
               SECOND_NUM = this.stack.shift()
 
@@ -56,7 +58,8 @@ export default class Interpreter {
         this.stack.unshift( Math.floor(SECOND_NUM / FIRST_NUM) )
     }
     duplicateOperation() {
-        this.stack.unshift(this.stack[0])
+        if (this.stack[0] !== undefined)
+            this.stack.unshift(this.stack[0])
     }
     executeOperation(operation) {
         if (!this.operationIsValid(operation))
@@ -84,15 +87,35 @@ export default class Interpreter {
         }, [ this.cc === 0 ? 0 : Number.MAX_VALUE,0 ])
     }
     findExitNode(pixelGroup) {
+        let dirFuc = this.findExitNodeFunc()
+
+        const FIRST = this[dirFuc](pixelGroup)
+
+        this.cc = (this.cc + 1) % 2
+
+        const SECOND = this[this.findExitNodeFunc()](pixelGroup)
+
+        this.cc = (this.cc + 1) % 2
+
+        if (this.hasBlackTileInNextMove(FIRST) || this.hasColoredTileInDirection(FIRST)) {
+            return FIRST
+        } else if (this.hasColoredTileInDirection(SECOND)) {
+            this.cc = (this.cc + 1) % 2
+            return SECOND
+        }
+
+        return FIRST
+    }
+    findExitNodeFunc() {
         switch(this.dp) {
             case 0:
-                return this.findLeftExitNode(pixelGroup)
+                return 'findLeftExitNode'
             case 1:
-                return this.findDownExitNode(pixelGroup)
+                return 'findDownExitNode'
             case 2:
-                return this.findRightExitNode(pixelGroup)
+                return 'findRightExitNode'
             case 3:
-                return this.findUpExitNode(pixelGroup)
+                return 'findUpExitNode'
             default:
                 throw new Error(`${this.dp}`)
         }
@@ -280,6 +303,89 @@ export default class Interpreter {
             this.stack.unshift(0)
         }
     }
+    hasColoredTileInDirection([X,Y]) {
+        const WHITE = '#FFF',
+              BLACK = '#000',
+              TILE_IS_COLORED = t => t !== WHITE && t !== BLACK
+
+        if (Y === undefined)
+            throw new Error('Y is undefined')
+
+        if (this.dp === 0) {
+            let found = false
+
+            for(let i = 1; X+i < this.src[0][0].length - 1; i++) {
+                const TILE_COLOR = this.src[Y][X+i].color
+
+                if (TILE_IS_COLORED(TILE_COLOR)) {
+                    found = true
+                    break
+                }
+            }
+
+            return found
+        } else if ( this.dp === 1 ) {
+            let found = false
+
+            for(let i = 1; Y+i < this.src.length - 1; i++) {
+                const TILE_COLOR = this.src[Y+i][X].color
+
+                if (TILE_IS_COLORED(TILE_COLOR)) {
+                    found = true
+                    break
+                }
+            }
+
+            return found  
+        } else if ( this.dp === 2 ) {
+            let found = false
+
+            for(let i = 1; X-i < -1; i++) {
+                const TILE_COLOR = this.src[Y][X-i].color
+
+                if (TILE_IS_COLORED(TILE_COLOR)) {
+                    found = true
+                    break
+                }
+            }
+
+            return found  
+        } else if ( this.dp === 3 ) {
+            let found = false
+
+            for(let i = 1; Y-i < -1; i++) {
+                const TILE_COLOR = this.src[Y-i][X].color
+
+                if (TILE_IS_COLORED(TILE_COLOR)) {
+                    found = true
+                    break
+                }
+            }
+
+            return found  
+        }
+
+        throw new Error([
+            `\n`,
+            `Direction Pointer is out of range`,
+            `this.dp === ${this.dp}`
+        ].join("\n"))
+    }
+    hasBlackTileInNextMove(tile) {
+        const [X,Y] = tile.map(n => +n)
+
+        if (this.dp === 0 && X+1 < this.src[0].length) {
+            return this.src[Y][X+1].color === '#000'
+        } else if (this.dp === 1 && Y+1 < this.src.length) {
+            return this.src[Y+1][X].color === '#000'
+        } else if (this.dp === 2 && X-1 > -1) {
+            return this.src[Y][X-1].color === '#000'
+        } else if (this.dp === 3 && Y-1 > -1) {
+            return this.src[Y-1][X].color === '#000'
+        }
+
+        return false
+    }
     run() {
         
     }
@@ -309,10 +415,23 @@ export default class Interpreter {
                operation.trim().length > 0 &&
                FLATTENED_COMMANDS.includes(operation)
     }
+    // TODO -- pointerOperation is sloppy
     pointerOperation() {
-        const POINTER_ROTATIONS = this.stack.shift()
+        let pointerRotations = this.stack.shift()
 
-        this.dp = Math.abs((this.dp + POINTER_ROTATIONS) % 4)
+        if (pointerRotations !== undefined) {
+            if (pointerRotations > 0) {
+                this.dp = Math.abs((this.dp + pointerRotations) % 4)
+            } else {
+                while(pointerRotations < 0) {
+                    this.dp--
+                    if (this.dp < 0) {
+                        this.dp = 3
+                    }
+                    pointerRotations++
+                }
+            }
+        }
     }
     popOperation() {
         this.stack.shift()
@@ -368,7 +487,10 @@ export default class Interpreter {
 
               `\n           Y: ${this.operationPoint[1]}`,
                 `           X: ${this.operationPoint[0]}`,
-                `xAxis.length: ${this.src[0].length}`
+                `xAxis.length: ${this.src[0].length}`,
+                ` PIXEL_GROUP: ${PIXEL_GROUP}`,
+                ` CURRENT_HEX: ${CURRENT_COLOR_HEX}`,
+                `  COLOR_NAME: ${CURRENT_COLOR_NAME}`
 
             ].join("\n"))
         }
