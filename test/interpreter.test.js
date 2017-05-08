@@ -4,15 +4,15 @@ import { mockSource } from './mocks'
 import Interpreter from '../src/Interpreter'
 
 const fullProgramDebug = _interpreter => {
-  console.log('STACK          ',_interpreter.stack)
-  console.log('previousCommand',_interpreter.previousCommand)
-  console.log('previousColor  ',_interpreter.previousColor)
-  console.log('DP             ',_interpreter.dp)
-  console.log('CC             ',_interpreter.cc)
-  console.log('operationPoint ',_interpreter.operationPoint)
-  console.log('step           ',_interpreter.currentStep)
-  console.log('tmpRegister    ',_interpreter.tmpRegister)
-  console.log('----------------------------------------')
+    console.log('STACK          ',_interpreter.stack)
+    console.log('previousCommand',_interpreter.previousCommand)
+    console.log('previousColor  ',_interpreter.previousColor)
+    console.log('DP             ',_interpreter.dp)
+    console.log('CC             ',_interpreter.cc)
+    console.log('operationPoint ',_interpreter.operationPoint)
+    console.log('step           ',_interpreter.currentStep)
+    console.log('tmpRegister    ',_interpreter.tmpRegister)
+    console.log('----------------------------------------')
 }
 
 describe('Interpreter', () => {
@@ -258,619 +258,620 @@ describe('Interpreter', () => {
                 INTERPRETER.dp = INTERPRETER.cc = 1
 
                 const EXPECTED = [1,4],
-                      ACTUAL = INTERPRETER.findExitNode(PIXEL_GROUP)
+                      ACTUAL   = INTERPRETER.findExitNode(PIXEL_GROUP)
 
                 assert.deepEqual(EXPECTED, ACTUAL)
             })
         })
     })
     describe('getCommandFromColor', () => {
-      describe('correctly gets the new command when', () => {
-        it('the current color is midGreen and the next color is darkGreen', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC),
-                EXPECTED = 'push',
-                ACTUAL = INTERPRETER.getCommandFromColor('midGreen', 'darkGreen')
+        describe('correctly gets the new command when', () => {
+            it('the current color is midGreen and the next color is darkGreen', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC),
+                      EXPECTED = 'push',
+                      ACTUAL = INTERPRETER.getCommandFromColor('midGreen', 'darkGreen')
 
-          assert.equal(EXPECTED, ACTUAL)
-        })
-        it('the current color is midYellow and the next color is darkBlue', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC),
-                EXPECTED = 'pointer',
-                ACTUAL = INTERPRETER.getCommandFromColor('midYellow', 'darkBlue')
+                assert.equal(EXPECTED, ACTUAL)
+            })
+            it('the current color is midYellow and the next color is darkBlue', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC),
+                      EXPECTED = 'pointer',
+                      ACTUAL = INTERPRETER.getCommandFromColor('midYellow', 'darkBlue')
 
-          assert.equal(EXPECTED, ACTUAL)
-        })
-        it('the current color is lightMagenta and the next color is lightCyan', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC),
-                EXPECTED = 'duplicate',
-                ACTUAL = INTERPRETER.getCommandFromColor('lightMagenta', 'lightCyan')
+                assert.equal(EXPECTED, ACTUAL)
+            })
+            it('the current color is lightMagenta and the next color is lightCyan', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC),
+                      EXPECTED = 'duplicate',
+                      ACTUAL = INTERPRETER.getCommandFromColor('lightMagenta', 'lightCyan')
 
-          assert.equal(EXPECTED, ACTUAL)
-        })
-        it('the current color is white and the next color is lightCyan', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC),
-                EXPECTED = 'no op',
-                ACTUAL = INTERPRETER.getCommandFromColor('white', 'lightCyan')
+                assert.equal(EXPECTED, ACTUAL)
+            })
+            it('the current color is white and the next color is lightCyan', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC),
+                      EXPECTED = 'no op',
+                      ACTUAL = INTERPRETER.getCommandFromColor('white', 'lightCyan')
 
-          assert.equal(EXPECTED, ACTUAL)
+                assert.equal(EXPECTED, ACTUAL)
+            })
         })
-      })
     })
     describe('executeOperation', () => {
-      describe('addOperation', () => {
-        it('can add the top two numbers in the stack together', () => {
-            const SRC = mockSource(20,20),
-                  INTERPRETER = new Interpreter(SRC)
+        describe('addOperation', () => {
+            it('can add the top two numbers in the stack together', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
                   
-            INTERPRETER.stack = [2,3]
+                INTERPRETER.stack = [2,3]
 
-            INTERPRETER.executeOperation('add')
+                INTERPRETER.executeOperation('add')
 
-            const EXPECTED = 5,
-                  ACTUAL = INTERPRETER.stack[0]
+                const EXPECTED = 5,
+                      ACTUAL   = INTERPRETER.stack[0]
 
-            assert.equal(EXPECTED, ACTUAL)
+                assert.equal(EXPECTED, ACTUAL)
+            })
         })
-      })
-      describe('duplicateOperation', () => {
-        it('can add the top two numbers in the stack together', () => {
-            const SRC = mockSource(20,20),
-                  INTERPRETER = new Interpreter(SRC)
-                  
-            INTERPRETER.stack = [2,3]
+        describe('divideOperation', () => {
+            it('can divide the top most value by stack[1] and shift the value back to the stack', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
 
-            INTERPRETER.executeOperation('duplicate')
+                INTERPRETER.stack = [5,20,3,2,1]
 
-            const EXPECTED = 2,
-                  ACTUAL = INTERPRETER.stack[0]
+                INTERPRETER.executeOperation('divide')
 
-            assert.equal(EXPECTED, ACTUAL)
-            assert.equal(INTERPRETER.stack.length, 3)
+                const EXPECTED = 4,
+                      ACTUAL = INTERPRETER.stack[0]
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+                assert.deepEqual([4,3,2,1], INTERPRETER.stack)
+            })
+            it('can divide the two numbers, and return the Integer value when there is a remainder', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [5,24,3,2,1]
+
+                INTERPRETER.executeOperation('divide')
+
+                const EXPECTED = 4,
+                      ACTUAL = INTERPRETER.stack[0]
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+                assert.deepEqual([4,3,2,1], INTERPRETER.stack)
+            })
+            it('cancels the operation if either value is 0', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [0,24,3,2,1]
+
+                INTERPRETER.executeOperation('divide')
+
+                assert.deepEqual([3,2,1], INTERPRETER.stack)
+            })
         })
-      })
-      describe('pushOperation', () => {
-        it('can push a new value onto the stack', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.tmpRegister = 30
-          INTERPRETER.stack = [5,4,3,2,1]
+        describe('duplicateOperation', () => {
+            it('can add the top two numbers in the stack together', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
 
-          INTERPRETER.executeOperation('push')
+                INTERPRETER.stack = [2,3]
 
-          const EXPECTED = 30,
-                ACTUAL = INTERPRETER.stack[0]
+                INTERPRETER.executeOperation('duplicate')
 
-          assert.equal(EXPECTED, ACTUAL)
+                const EXPECTED = 2,
+                      ACTUAL   = INTERPRETER.stack[0]
+
+                assert.equal(EXPECTED, ACTUAL)
+                assert.equal(INTERPRETER.stack.length, 3)
+            })
         })
-      })
-      describe('popOperation', () => {
-        it('can pop a value off the stack', () => {
-          const SRC = mockSource(20,20),
-                  INTERPRETER = new Interpreter(SRC)
-                  
-            INTERPRETER.stack = [1,2,3,4,5]
+        describe('greaterOperation', () => {
+            describe('if stack[1] is greater than stack[0], push 1, else push 0', () => {
+                it('stack[1] is less than or equal to stack[0]', () => {
+                    const SRC = mockSource(20,20),
+                          INTERPRETER = new Interpreter(SRC)
 
-            INTERPRETER.executeOperation('pop')
+                    INTERPRETER.stack = [5,4,3,2,1]
 
-            const EXPECTED = [2,3,4,5],
-                  ACTUAL = INTERPRETER.stack
+                    INTERPRETER.executeOperation('greater')
 
-            assert.deepEqual(EXPECTED, ACTUAL)
+                    const EXPECTED = 0,
+                          ACTUAL = INTERPRETER.stack[0]
+
+                    assert.deepEqual(EXPECTED, ACTUAL)
+                    assert.deepEqual([0,3,2,1], INTERPRETER.stack)    
+                })
+                it('stack[1] is greater than stack[0]', () => {
+                    const SRC = mockSource(20,20),
+                          INTERPRETER = new Interpreter(SRC)
+
+                    INTERPRETER.stack = [4,5,3,2,1]
+
+                    INTERPRETER.executeOperation('greater')
+
+                    const EXPECTED = 1,
+                          ACTUAL = INTERPRETER.stack[0]
+
+                    assert.deepEqual(EXPECTED, ACTUAL)
+                    assert.deepEqual([1,3,2,1], INTERPRETER.stack)    
+                })
+            })
         })
-      })
-      describe('subtractOperation', () => {
-        it('can subtract the stack[1] from stack[0] and shift the result back to the stack', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                  
-          INTERPRETER.stack = [5,4,3,2,1]
+        describe('incharOperation', () => {
+            it('prompts for input from the front end', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
 
-          INTERPRETER.executeOperation('subtract')
+                const PROMPT = INTERPRETER.executeOperation('in(char)').prompt
+                PROMPT('a')
 
-          const EXPECTED = -1,
-                ACTUAL = INTERPRETER.stack[0]
+                const EXPECTED = [97],
+                      ACTUAL = INTERPRETER.stack
 
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([-1,3,2,1], INTERPRETER.stack)
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
+        })
+        describe('innumberOperation', () => {
+            it('prompts the front end for a number', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                const PROMPT = INTERPRETER.executeOperation('in(number)').prompt
+                PROMPT('33')
+
+                const EXPECTED = [33],
+                      ACTUAL   = INTERPRETER.stack  
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
+        })
+        describe('modOperation', () => {
+            it('calculated stack[1] mod stack[0] and pushes the result to the stack', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [20,44,3,2,1]
+
+                INTERPRETER.executeOperation('mod')
+
+                const EXPECTED = 4,
+                      ACTUAL = INTERPRETER.stack[0]
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+                assert.deepEqual([4,3,2,1], INTERPRETER.stack)
+            })
+        })
+        describe('multiplyOperation', () => {
+            it('can multiply the top two values of the stack', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [5,4,3,2,1]
+
+                INTERPRETER.executeOperation('multiply')
+
+                const EXPECTED = 20,
+                      ACTUAL = INTERPRETER.stack[0]
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+                assert.deepEqual([20,3,2,1], INTERPRETER.stack)
+            })
+        })
+        describe('notOperation', () => {
+            describe('if the top stack value is 0', () => {
+                it('replaces the top value with 1', () => {
+                    const SRC = mockSource(20,20),
+                          INTERPRETER = new Interpreter(SRC)
+
+                    INTERPRETER.stack = [0,3,2,1]
+
+                    INTERPRETER.executeOperation('not')
+
+                    const EXPECTED = 1,
+                          ACTUAL = INTERPRETER.stack[0]
+
+                    assert.deepEqual(EXPECTED, ACTUAL)
+                    assert.deepEqual([1,3,2,1], INTERPRETER.stack)  
+                })
+            })
+            describe('if the top stack value is not 0', () => {
+                it('replaces the top value with 0', () => {
+                    const SRC = mockSource(20,20),
+                          INTERPRETER = new Interpreter(SRC)
+
+                    INTERPRETER.stack = [66,3,2,1]
+
+                    INTERPRETER.executeOperation('not')
+
+                    const EXPECTED = 0,
+                          ACTUAL = INTERPRETER.stack[0]
+
+                    assert.deepEqual(EXPECTED, ACTUAL)
+                    assert.deepEqual([0,3,2,1], INTERPRETER.stack)  
+                })
+            })
+        })
+        describe('outcharOperation', () => {
+            it('outputs a char value to the front end', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [97,4,3,2,1]
+
+                const RES      = INTERPRETER.executeOperation('out(char)').output,
+                      ACTUAL   = INTERPRETER.stack,
+                      EXPECTED = [4,3,2,1]
+
+                assert.equal('a',RES)
+                assert.deepEqual(EXPECTED,ACTUAL)
+            })
+        })
+        describe('outnumberOperation', () => {
+            it('outputs a number value to the front end', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [97,4,3,2,1]
+
+                const RES      = INTERPRETER.executeOperation('out(number)').output,
+                      ACTUAL   = INTERPRETER.stack,
+                      EXPECTED = [4,3,2,1]
+
+                assert.equal(97,RES)
+                assert.deepEqual(EXPECTED,ACTUAL)
+            })
+        })
+        describe('pointerOperation', () => {
+            it('shift the top value from the stack and rotates the pointer by 90deg that many times', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [8,5,6,7,8,9]
+
+                INTERPRETER.executeOperation('pointer')
+
+                const EXPECTED = 0,
+                      ACTUAL = INTERPRETER.dp
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
+            it('rotates the pointer counter clockwise when passed a negative number', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [-3,9,8,7,6,5,4,3,2,1]
+
+                INTERPRETER.executeOperation('pointer')
+
+                const EXPECTED = 1,
+                      ACTUAL = INTERPRETER.dp  
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
+        })
+        describe('popOperation', () => {
+            it('can pop a value off the stack', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [1,2,3,4,5]
+
+                INTERPRETER.executeOperation('pop')
+
+                const EXPECTED = [2,3,4,5],
+                      ACTUAL   = INTERPRETER.stack
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
+        })
+        describe('pushOperation', () => {
+            it('can push a new value onto the stack', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack       = [5,4,3,2,1]
+                INTERPRETER.tmpRegister = 30
+
+                INTERPRETER.executeOperation('push')
+
+                const EXPECTED = 30,
+                      ACTUAL   = INTERPRETER.stack[0]
+
+                assert.equal(EXPECTED, ACTUAL)
+            })
+        })
+        describe('rollOperation', () => {
+            it('correctly rolls 3,4', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [3,2,4,3,2,1]
+
+                INTERPRETER.executeOperation('roll')
+
+                const EXPECTED = [3,4,2,1],
+                      ACTUAL   = INTERPRETER.stack
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
+            it('correctly rolls -3,5', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [-3,5,7,6,5,4,3,2,1]
+
+                INTERPRETER.executeOperation('roll')
+
+                const EXPECTED = [5,4,3,7,6,2,1],
+                      ACTUAL   = INTERPRETER.stack
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
+        })
+        describe('subtractOperation', () => {
+            it('can subtract the stack[1] from stack[0] and shift the result back to the stack', () => {
+                const SRC         = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [5,4,3,2,1]
+
+                INTERPRETER.executeOperation('subtract')
+
+                const EXPECTED = -1,
+                      ACTUAL = INTERPRETER.stack[0]
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+                assert.deepEqual([-1,3,2,1], INTERPRETER.stack)
+            })
+        })
+        describe('switchOperation', () => {
+            it('shift the top value from the stack and toggle the cc that many times', () => {
+                const SRC = mockSource(20,20),
+                      INTERPRETER = new Interpreter(SRC)
+
+                INTERPRETER.stack = [7,5,6,7,8,9]
+
+                INTERPRETER.executeOperation('switch')
+
+                const EXPECTED = 1,
+                      ACTUAL = INTERPRETER.cc
+
+                assert.deepEqual(EXPECTED, ACTUAL)
+            })
         })
     })
-    describe('multiplyOperation', () => {
-      it('can multiply the top two values of the stack', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [5,4,3,2,1]
-
-          INTERPRETER.executeOperation('multiply')
-
-          const EXPECTED = 20,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([20,3,2,1], INTERPRETER.stack)
-      })
-    })
-    describe('divideOperation', () => {
-      it('can divide the top most value by stack[1] and shift the value back to the stack', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [5,20,3,2,1]
-
-          INTERPRETER.executeOperation('divide')
-
-          const EXPECTED = 4,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([4,3,2,1], INTERPRETER.stack)
-      })
-      it('can divide the two numbers, and return the Integer value when there is a remainder', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [5,24,3,2,1]
-
-          INTERPRETER.executeOperation('divide')
-
-          const EXPECTED = 4,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([4,3,2,1], INTERPRETER.stack)
-      })
-      it('cancels the operation if either value is 0', () => {
-        const SRC = mockSource(20,20),
-              INTERPRETER = new Interpreter(SRC)
-              
-        INTERPRETER.stack = [0,24,3,2,1]
-
-        INTERPRETER.executeOperation('divide')
-
-        assert.deepEqual([3,2,1], INTERPRETER.stack)
-      })
-    })
-    describe('modOperation', () => {
-      it('calculated stack[1] mod stack[0] and pushes the result to the stack', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [20,44,3,2,1]
-
-          INTERPRETER.executeOperation('mod')
-
-          const EXPECTED = 4,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([4,3,2,1], INTERPRETER.stack)
-      })
-    })
-    describe('notOperation', () => {
-      describe('if the top stack value is 0', () => {
-        it('replaces the top value with 1', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [0,3,2,1]
-
-          INTERPRETER.executeOperation('not')
-
-          const EXPECTED = 1,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([1,3,2,1], INTERPRETER.stack)  
-        })
-      })
-      describe('if the top stack value is not 0', () => {
-        it('replaces the top value with 0', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [66,3,2,1]
-
-          INTERPRETER.executeOperation('not')
-
-          const EXPECTED = 0,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([0,3,2,1], INTERPRETER.stack)  
-        })
-      })
-    })
-    describe('greaterOperation', () => {
-      describe('if stack[1] is greater than stack[0], push 1, else push 0', () => {
-        it('stack[1] is less than or equal to stack[0]', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [5,4,3,2,1]
-
-          INTERPRETER.executeOperation('greater')
-
-          const EXPECTED = 0,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([0,3,2,1], INTERPRETER.stack)    
-        })
-        it('stack[1] is greater than stack[0]', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [4,5,3,2,1]
-
-          INTERPRETER.executeOperation('greater')
-
-          const EXPECTED = 1,
-                ACTUAL = INTERPRETER.stack[0]
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-          assert.deepEqual([1,3,2,1], INTERPRETER.stack)    
-        })
-      })
-    })
-    describe('pointerOperation', () => {
-      it('shift the top value from the stack and rotates the pointer by 90deg that many times', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [8,5,6,7,8,9]
-
-          INTERPRETER.executeOperation('pointer')
-
-          const EXPECTED = 0,
-                ACTUAL = INTERPRETER.dp
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-      })
-      it('rotates the pointer counter clockwise when passed a negative number', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [-3,9,8,7,6,5,4,3,2,1]
-
-          INTERPRETER.executeOperation('pointer')
-
-          const EXPECTED = 1,
-                ACTUAL = INTERPRETER.dp  
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-      })
-    })
-    describe('switchOperation', () => {
-      it('shift the top value from the stack and toggle the cc that many times', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [7,5,6,7,8,9]
-
-          INTERPRETER.executeOperation('switch')
-
-          const EXPECTED = 1,
-                ACTUAL = INTERPRETER.cc
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-      })
-    })
-    describe('rollOperation', () => {
-      it('correctly rolls 3,4', () => {
-          const SRC         = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [3,2,4,3,2,1]
-
-          INTERPRETER.executeOperation('roll')
-
-          const EXPECTED = [3,4,2,1],
-                ACTUAL   = INTERPRETER.stack
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-      })
-      it('correctly rolls -3,5', () => {
-          const SRC         = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          INTERPRETER.stack = [-3,5,7,6,5,4,3,2,1]
-
-          INTERPRETER.executeOperation('roll')
-
-          const EXPECTED = [5,4,3,7,6,2,1],
-                ACTUAL   = INTERPRETER.stack
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-      })
-    })
-    describe('incharOperation', () => {
-      it('prompts for input from the front end', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-
-          const PROMPT = INTERPRETER.executeOperation('in(char)').prompt
-          PROMPT('a')
-
-          const EXPECTED = [97],
-                ACTUAL = INTERPRETER.stack
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-      })
-    })
-    describe('innumberOperation', () => {
-      it('prompts the front end for a number', () => {
-          const SRC = mockSource(20,20),
-                INTERPRETER = new Interpreter(SRC)
-                
-          const PROMPT = INTERPRETER.executeOperation('in(number)').prompt
-          PROMPT('33')
-
-          const EXPECTED = [33],
-                ACTUAL = INTERPRETER.stack  
-
-          assert.deepEqual(EXPECTED, ACTUAL)
-      })
-    })
-    describe('outcharOperation', () => {
-      it('outputs a char value to the front end', () => {
-        const SRC = mockSource(20,20),
-              INTERPRETER = new Interpreter(SRC)
-
-        INTERPRETER.stack = [97,4,3,2,1]
-
-        const RES = INTERPRETER.executeOperation('out(char)').output,
-              EXPECTED = [4,3,2,1],
-              ACTUAL = INTERPRETER.stack
-
-        assert.equal('a',RES)
-        assert.deepEqual(EXPECTED,ACTUAL)
-      })
-    })
-    describe('outnumberOperation', () => {
-      it('outputs a number value to the front end', () => {
-        const SRC = mockSource(20,20),
-              INTERPRETER = new Interpreter(SRC)
-
-        INTERPRETER.stack = [97,4,3,2,1]
-
-        const RES = INTERPRETER.executeOperation('out(number)').output,
-              EXPECTED = [4,3,2,1],
-              ACTUAL = INTERPRETER.stack
-
-        assert.equal(97,RES)
-        assert.deepEqual(EXPECTED,ACTUAL)
-      })
-    })
-  })
-  describe('getNextOperationPoint', () => {
+})
+describe('getNextOperationPoint', () => {
     it('can get the next point when the direction and codel do not have to change', () => {
-      const SRC = mockSource(20,20,[
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr'],
-            ]),
-            INTERPRETER = new Interpreter(SRC),
-            PIXEL_GROUP = INTERPRETER.getColorGroup(0,0)
+        const SRC = mockSource(20,20,[
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr'],
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              PIXEL_GROUP = INTERPRETER.getColorGroup(0,0)
 
-      INTERPRETER.dp = INTERPRETER.cc = 0
+        INTERPRETER.dp = INTERPRETER.cc = 0
 
-      const EXPECTED = [4,0],
-            ACTUAL = INTERPRETER.getNextOperationPoint([3,0],PIXEL_GROUP)
+        const EXPECTED = [4,0],
+              ACTUAL = INTERPRETER.getNextOperationPoint([3,0],PIXEL_GROUP)
 
-      assert.deepEqual(EXPECTED, ACTUAL)
+        assert.deepEqual(EXPECTED, ACTUAL)
     })
     it('can get the next point when it has to change direction', () => {
-      const SRC = mockSource(20,20,[
-              ['wh','wh','wh','wh'],
-              ['wh','wh','wh','wh'],
-              ['wh','wh','wh','wh'],
-              ['mr','wh','wh','wh'],
-            ]),
-            INTERPRETER = new Interpreter(SRC),
-            PIXEL_GROUP = INTERPRETER.getColorGroup(0,3)
+        const SRC = mockSource(20,20,[
+                ['wh','wh','wh','wh'],
+                ['wh','wh','wh','wh'],
+                ['wh','wh','wh','wh'],
+                ['mr','wh','wh','wh'],
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              PIXEL_GROUP = INTERPRETER.getColorGroup(0,3)
 
-      INTERPRETER.dp = 2
-      INTERPRETER.cc = 0
+        INTERPRETER.dp = 2
+        INTERPRETER.cc = 0
 
-      const EXPECTED = [0,2],
-            ACTUAL = INTERPRETER.getNextOperationPoint([0,3],PIXEL_GROUP)
+        const EXPECTED = [0,2],
+              ACTUAL   = INTERPRETER.getNextOperationPoint([0,3],PIXEL_GROUP)
 
-      assert.deepEqual(EXPECTED, ACTUAL)
-      assert.equal(INTERPRETER.dp, 3)
+        assert.deepEqual(EXPECTED, ACTUAL)
+        assert.equal(INTERPRETER.dp, 3)
     })
     it('can properly tell when a program should end', () => {
-      const SRC = mockSource(20,20,[
-              ['wh','wh','bl','wh','wh'],
-              ['wh','bl','lg','bl','wh'],
-              ['wh','bl','lg','wh','wh'],
-              ['wh','bl','lg','bl','wh'],
-              ['wh','wh','bl','wh','wh'],
-            ]),
-            INTERPRETER = new Interpreter(SRC),
-            PIXEL_GROUP = INTERPRETER.getColorGroup(2,2),
-            EXIT_NODE = INTERPRETER.findExitNode(PIXEL_GROUP)
+        const SRC = mockSource(20,20,[
+                ['wh','wh','bl','wh','wh'],
+                ['wh','bl','lg','bl','wh'],
+                ['wh','bl','lg','wh','wh'],
+                ['wh','bl','lg','bl','wh'],
+                ['wh','wh','bl','wh','wh'],
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              PIXEL_GROUP = INTERPRETER.getColorGroup(2,2),
+              EXIT_NODE   = INTERPRETER.findExitNode(PIXEL_GROUP)
 
-      assert.isNull(INTERPRETER.getNextOperationPoint(EXIT_NODE, PIXEL_GROUP))
+        assert.isNull(INTERPRETER.getNextOperationPoint(EXIT_NODE, PIXEL_GROUP))
     })
-  })
-  describe('step', () => {
+})
+describe('step', () => {
     it('can execute the first command of a program', () => {
-      const SRC = mockSource(20,20,[
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr']
-            ]),
-            INTERPRETER = new Interpreter(SRC)
+        const SRC = mockSource(20,20,[
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr']
+              ]),
+              INTERPRETER = new Interpreter(SRC)
 
-      INTERPRETER.step()
+        INTERPRETER.step()
 
-      assert.equal(INTERPRETER.dp, 0)
-      assert.equal(INTERPRETER.cc, 0)
-      assert.equal(INTERPRETER.tmpRegister, 16)
-      assert.deepEqual(INTERPRETER.stack, [])
-      assert.equal(INTERPRETER.previousColor, 'midRed')
-      assert.deepEqual(INTERPRETER.operationPoint, [4,0])
+        assert.equal(INTERPRETER.dp, 0)
+        assert.equal(INTERPRETER.cc, 0)
+        assert.equal(INTERPRETER.tmpRegister, 16)
+        assert.equal(INTERPRETER.previousColor, 'midRed')
+        assert.deepEqual(INTERPRETER.stack, [])
+        assert.deepEqual(INTERPRETER.operationPoint, [4,0])
     })
     it('can execute the first two commands of a program', () => {
-      const SRC = mockSource(20,20,[
-              ['mr','mr','mr','mr','dr'],
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr'],
-              ['mr','mr','mr','mr']
-            ]),
-            INTERPRETER = new Interpreter(SRC)
+        const SRC = mockSource(20,20,[
+                ['mr','mr','mr','mr','dr'],
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr'],
+                ['mr','mr','mr','mr']
+              ]),
+              INTERPRETER = new Interpreter(SRC)
 
-      INTERPRETER.step()
-      INTERPRETER.step()
+        INTERPRETER.step()
+        INTERPRETER.step()
 
-      assert.equal(INTERPRETER.dp, 0)
-      assert.equal(INTERPRETER.cc, 0)
-      assert.equal(INTERPRETER.tmpRegister, 1)
-      assert.deepEqual(INTERPRETER.stack, [16])
-      assert.equal(INTERPRETER.previousColor, 'darkRed')
-      assert.deepEqual(INTERPRETER.operationPoint, [5,0])
+        assert.equal(INTERPRETER.dp, 0)
+        assert.equal(INTERPRETER.cc, 0)
+        assert.equal(INTERPRETER.tmpRegister, 1)
+        assert.deepEqual(INTERPRETER.stack, [16])
+        assert.equal(INTERPRETER.previousColor, 'darkRed')
+        assert.deepEqual(INTERPRETER.operationPoint, [5,0])
     })
     it('can execute a 4 step program that adds 4 and 4',() => {
-      const SRC = mockSource(20,20,[
-              ['mr','mr','dr','dr','lr','ly'],
-              ['mr','mr','dr','dr']
-            ]),
-            INTERPRETER = new Interpreter(SRC)
+        const SRC = mockSource(20,20,[
+                ['mr','mr','dr','dr','lr','ly'],
+                ['mr','mr','dr','dr']
+              ]),
+              INTERPRETER = new Interpreter(SRC)
 
-      let count = 0
+        let count = 0
 
-      while(count < 4) {
-        INTERPRETER.step()
-        count++
-      }
+        while(count < 4) {
+            INTERPRETER.step()
+            count++
+        }
 
-      assert.equal(INTERPRETER.dp, 0)
-      assert.equal(INTERPRETER.cc, 0)
-      assert.equal(INTERPRETER.tmpRegister, 1)
-      assert.deepEqual(INTERPRETER.stack, [8])
-      assert.equal(INTERPRETER.previousColor, 'lightYellow')
-      assert.deepEqual(INTERPRETER.operationPoint, [6,0])
+        assert.equal(INTERPRETER.dp, 0)
+        assert.equal(INTERPRETER.cc, 0)
+        assert.equal(INTERPRETER.tmpRegister, 1)
+        assert.deepEqual(INTERPRETER.stack, [8])
+        assert.equal(INTERPRETER.previousColor, 'lightYellow')
+        assert.deepEqual(INTERPRETER.operationPoint, [6,0])
     })
     it('can run a 15 step program', () => {
-      const SRC = mockSource(15,15,[
-              // 0    1    2    3    4    5    6    7    8    9   10   11   12   13
-              ['mr','dr','lr','mr','dr','lr','mr','dr','lb','wh','mr','dr','ly','mb'], // 0
-              ['wh','dr','lr','mr','dr','lr','mr','wh','wh','wh','mr','wh','wh','wh'], // 1
-              ['wh','wh','lr','mr','dr','lr','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
-              ['wh','wh','wh','mr','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 3
-              ['wh','wh','wh','wh','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 4
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 5
-              ['wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
-              ['bl','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
-              ['bl','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg'], // 8
-              ['bl','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl'], // 9
-              ['wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 10
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh']  // 11
-            ]),
-            INTERPRETER = new Interpreter(SRC)
+        const SRC = mockSource(15,15,[
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13
+                ['mr','dr','lr','mr','dr','lr','mr','dr','lb','wh','mr','dr','ly','mb'], // 0
+                ['wh','dr','lr','mr','dr','lr','mr','wh','wh','wh','mr','wh','wh','wh'], // 1
+                ['wh','wh','lr','mr','dr','lr','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
+                ['wh','wh','wh','mr','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 3
+                ['wh','wh','wh','wh','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 4
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 5
+                ['wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
+                ['bl','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
+                ['bl','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg'], // 8
+                ['bl','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl'], // 9
+                ['wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 10
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh']  // 11
+              ]),
+              INTERPRETER = new Interpreter(SRC)
 
-      let haltProgram = false,
-          count = 0
+        let halt  = false,
+            count = 0
 
-      while(!haltProgram) {
-        const res = INTERPRETER.step()
-        // fullProgramDebug(INTERPRETER)
-        count++
-        haltProgram = res.halt
-      }
+        while(!halt) {
+            const res = INTERPRETER.step()
+            // fullProgramDebug(INTERPRETER)
+            count++
+            halt = res.halt
+        }
 
-      const EXPECTED = [5,4,2,1],
-            ACTUAL = INTERPRETER.stack
+        const EXPECTED = [5,4,2,1],
+              ACTUAL   = INTERPRETER.stack
 
-      assert.deepEqual(EXPECTED, ACTUAL)
+        assert.deepEqual(EXPECTED, ACTUAL)
     })
     it('can run a fibonacci program', () => {
-      const SRC = mockSource(20,20,[
-              // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
-              ['mr','dr','wh','wh','mr','dr','lr','my','dy','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], // 0
-              ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 1
-              ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
-              ['mr','wh','wh','wh','wh','bl','bl','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 3
-              ['mr','wh','wh','wh','bl','mg','mg','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 4
-              ['wh','wh','wh','wh','wh','bl','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 5
-              ['bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
-              ['mg','wh','mr','mr','mr','dr','lc','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 8
-              ['wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 9
-              // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
-              ['wh','wh','mg','wh','mr','dr','lr','mb','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], // 10
-              ['wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 11
-              ['wh','wh','ly','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 12
-              ['wh','wh','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 13
-              ['wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 14
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mc','wh','wh','wh','mb','wh','wh','wh','wh'], // 15
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dc','mc','wh','wh','wh','mb','wh','wh','wh','wh'], // 16
-              ['lg','wh','dr','mc','mr','lm','dm','mm','my','lc','dc','mc','mg','lb','db','mb','mr','wh','mg','wh'], // 17
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh'], // 18
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh']
-            ]),
-            INTERPRETER = new Interpreter(SRC)
+        const SRC = mockSource(20,20,[
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
+                ['mr','dr','wh','wh','mr','dr','lr','my','dy','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], // 0
+                ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 1
+                ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
+                ['mr','wh','wh','wh','wh','bl','bl','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 3
+                ['mr','wh','wh','wh','bl','mg','mg','mg','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 4
+                ['wh','wh','wh','wh','wh','bl','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 5
+                ['bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
+                ['mg','wh','mr','mr','mr','dr','lc','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 8
+                ['wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 9
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
+                ['wh','wh','mg','wh','mr','dr','lr','mb','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], // 10
+                ['wh','wh','wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 11
+                ['wh','wh','ly','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 12
+                ['wh','wh','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 13
+                ['wh','wh','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 14
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mc','wh','wh','wh','mb','wh','wh','wh','wh'], // 15
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dc','mc','wh','wh','wh','mb','wh','wh','wh','wh'], // 16
+                ['lg','wh','dr','mc','mr','lm','dm','mm','my','lc','dc','mc','mg','lb','db','mb','mr','wh','mg','wh'], // 17
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','bl','wh'], // 18
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh']
+              ]),
+              INTERPRETER = new Interpreter(SRC)
 
-      const EXPECTED = [0,13,8]
+        const EXPECTED = [0,13,8]
 
-      let count = 0,
-          haltProgram = false
+        let count = 0,
+            halt  = false
 
-      while(!haltProgram) {
-        const res = INTERPRETER.step()
-        // fullProgramDebug(INTERPRETER)
-        count++
-        haltProgram = res.halt
-      }
+        while(!halt) {
+            const res = INTERPRETER.step()
+            // fullProgramDebug(INTERPRETER)
+            count++
+            halt = res.halt
+        }
 
-      assert.deepEqual(EXPECTED,INTERPRETER.stack)
+        assert.deepEqual(EXPECTED,INTERPRETER.stack)
     })
     it('can run a program that uses all non IO operations', () => {
-       const SRC = mockSource(0,0,[
-              // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
-              ['mr','dr','lr','mr','dr','lr','mr','my','lg','lr','lb','lm','mm','dm','lc','lm','wh','wh','wh','mg'], // 0
-              ['mr','dr','lr','mr','dr','wh','wh','wh','wh','wh','wh','lm','wh','wh','wh','wh','wh','wh','wh','wh'], // 1
-              ['mr','dr','lr','mr','wh','wh','wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
-              ['mr','dr','lr','wh','wh','wh','wh','wh','mg','wh','wh','wh','mg','bl','wh','wh','wh','wh','wh','wh'], // 3
-              ['mr','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dg','wh','wh','wh','wh','wh','wh','wh'], // 4
-              ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mm','wh','wh','wh','wh','wh','wh','wh'], // 5
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
-              ['wh','bl','bl','bl','wh','wh','wh','wh','dm','mg','wh','wh','wh','wh','wh','wh','dr','mr','wh','mg'], // 8
-              ['bl','mg','mg','mg','bl','wh','wh','wh','bl','wh','wh','wh','mg','mg','mg','wh','wh','wh','wh','bl'], // 9
-              // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
-              ['wh','bl','wh','bl','wh','wh','wh','wh','mg','wh','mg','bl','mg','mg','mg','wh','wh','wh','wh','wh'], // 10
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','wh','wh','wh','wh','wh'], // 11
-              ['wh','bl','lr','mr','dr','lr','mr','wh','wh','wh','mg','wh','mg','wh','mg','wh','wh','wh','wh','wh'], // 12
-              ['wh','wh','wh','wh','wh','wh','wh','wh','mb','wh','bl','wh','dc','wh','wh','wh','wh','wh','wh','wh'], // 13
-              ['wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','lm','wh','mg','wh','wh','wh','wh','wh'], // 14
-              ['wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','mm','wh','wh','wh','wh','wh','wh','wh'], // 15
-              ['wh','wh','wh','wh','wh','wh','wh','wh','dr','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh'], // 16
-              ['wh','wh','wh','mr','mr','mr','mr','mr','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 17
-              ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 18
-              ['wh','wh','bl','mg','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh']  // 19
-             ]),
-             INTERPRETER = new Interpreter(SRC),
-             EXPECTED = [6]
+        const SRC = mockSource(0,0,[
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
+                ['mr','dr','lr','mr','dr','lr','mr','my','lg','lr','lb','lm','mm','dm','lc','lm','wh','wh','wh','mg'], // 0
+                ['mr','dr','lr','mr','dr','wh','wh','wh','wh','wh','wh','lm','wh','wh','wh','wh','wh','wh','wh','wh'], // 1
+                ['mr','dr','lr','mr','wh','wh','wh','wh','bl','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 2
+                ['mr','dr','lr','wh','wh','wh','wh','wh','mg','wh','wh','wh','mg','bl','wh','wh','wh','wh','wh','wh'], // 3
+                ['mr','dr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','dg','wh','wh','wh','wh','wh','wh','wh'], // 4
+                ['mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mm','wh','wh','wh','wh','wh','wh','wh'], // 5
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 6
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 7
+                ['wh','bl','bl','bl','wh','wh','wh','wh','dm','mg','wh','wh','wh','wh','wh','wh','dr','mr','wh','mg'], // 8
+                ['bl','mg','mg','mg','bl','wh','wh','wh','bl','wh','wh','wh','mg','mg','mg','wh','wh','wh','wh','bl'], // 9
+                // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
+                ['wh','bl','wh','bl','wh','wh','wh','wh','mg','wh','mg','bl','mg','mg','mg','wh','wh','wh','wh','wh'], // 10
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','mg','mg','wh','wh','wh','wh','wh'], // 11
+                ['wh','bl','lr','mr','dr','lr','mr','wh','wh','wh','mg','wh','mg','wh','mg','wh','wh','wh','wh','wh'], // 12
+                ['wh','wh','wh','wh','wh','wh','wh','wh','mb','wh','bl','wh','dc','wh','wh','wh','wh','wh','wh','wh'], // 13
+                ['wh','wh','wh','wh','wh','wh','wh','wh','mr','wh','wh','wh','lm','wh','mg','wh','wh','wh','wh','wh'], // 14
+                ['wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','mm','wh','wh','wh','wh','wh','wh','wh'], // 15
+                ['wh','wh','wh','wh','wh','wh','wh','wh','dr','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh'], // 16
+                ['wh','wh','wh','mr','mr','mr','mr','mr','mr','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 17
+                ['wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh'], // 18
+                ['wh','wh','bl','mg','wh','wh','wh','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh']  // 19
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              EXPECTED    = [6]
 
-      let count = 0,
-          halt = false
+        let count = 0,
+            halt  = false
 
-      while(!halt) {
-        const res = INTERPRETER.step()
-        // fullProgramDebug(INTERPRETER)
-        halt = res.halt
-        count++
-      }
+        while(!halt) {
+            const res = INTERPRETER.step()
+            // fullProgramDebug(INTERPRETER)
+            halt = res.halt
+            count++
+        }
 
-      assert.deepEqual(EXPECTED, INTERPRETER.stack)
+        assert.deepEqual(EXPECTED, INTERPRETER.stack)
     })
     it('can run a program with advenced control flow', () => {
         const SRC = mockSource(0,0,[
@@ -909,74 +910,77 @@ describe('Interpreter', () => {
                 ['wh','wh','wh','wh','wh','wh','wh','wh','bl','mg','wh','wh','wh','wh','wh','mg','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh']  // 29
               ]),
               INTERPRETER = new Interpreter(SRC),
-              EXPECTED = [6,6,6]
+              EXPECTED    = [6,6,6]
 
-      let count = 0,
-          halt = false
+        let count = 0,
+            halt  = false
 
-      while(!halt) {
-        const res = INTERPRETER.step()
-        // fullProgramDebug(INTERPRETER)
-        halt = res.halt
-        count++
-      }
+        while(!halt) {
+            const res = INTERPRETER.step()
+            // fullProgramDebug(INTERPRETER)
+            halt = res.halt
+            count++
+        }
 
-      assert.deepEqual(EXPECTED, INTERPRETER.stack)
+        assert.deepEqual(EXPECTED, INTERPRETER.stack)
     })
     it('can run a program that uses the in(char) IO operation', () => {
-      const SRC = mockSource(20,20,[
-              ['mc','mg','mr','my']
-            ]),
-            INTERPRETER = new Interpreter(SRC)
+        const SRC = mockSource(20,20,[
+                ['mc','mg','mr','my']
+              ]),
+              INTERPRETER = new Interpreter(SRC)
 
-      let count = 0
+        let count = 0
 
-      while(count < 4) {
-        const res = INTERPRETER.step()
-        if (res.hasOwnProperty('prompt')) {
-          res.prompt('g')
+        while(count < 4) {
+            const res = INTERPRETER.step()
+
+            if (res.hasOwnProperty('prompt')) {
+                res.prompt('g')
+            }
+
+            count++
         }
-        count++
-      }
 
-      const EXPECTED = [206],
-            ACTUAL = INTERPRETER.stack
+        const EXPECTED = [206],
+              ACTUAL   = INTERPRETER.stack
 
-      assert.deepEqual(EXPECTED, ACTUAL)
-        
+        assert.deepEqual(EXPECTED, ACTUAL)
+
     })
     it('throws an error when step is called but IO obligations are not fulfilled', () => {
-      assert.throws(ignoreInCharIOFunc)
+        assert.throws(ignoreInCharIOFunc)
     })
     it('can run a simple program that uses all IO operations', () => {
-      const SRC = mockSource(20,20,[
-              ['mc','ly','lr','dm','lb']
-            ]),
-            INTERPRETER = new Interpreter(SRC),
-            INPUTS = ['6','s'],
-            OUTPUT = []
+        const SRC = mockSource(20,20,[
+                ['mc','ly','lr','dm','lb']
+              ]),
+              INTERPRETER = new Interpreter(SRC),
+              INPUTS      = ['6','s'],
+              OUTPUT      = []
 
-      let count = 0
+        let count = 0
 
-      while(count < 5) {
-        const RES = INTERPRETER.step()
+        while(count < 5) {
+            const RES = INTERPRETER.step()
 
-        if (RES.hasOwnProperty('prompt')) {
-          RES.prompt(INPUTS.shift())
+            if (RES.hasOwnProperty('prompt')) {
+                RES.prompt(INPUTS.shift())
+            }
+
+            if (RES.output) {
+                OUTPUT.push(RES.output)
+            }
+
+            count++
         }
 
-        if (RES.output) {
-          OUTPUT.push(RES.output)
-        }
+        const EXPECTED = ['s','6']
 
-        count++
-      }
-
-      const EXPECTED = ['s','6']
-
-      assert.deepEqual(EXPECTED, OUTPUT)
+        assert.deepEqual(EXPECTED, OUTPUT)
     })
     it('runs a program with complicated IO', () => {
+        // Asks for user input until '0' is give, then prints 'Thx'
         const SRC = mockSource(20,40,[
                 // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32  
                 ['mr','mr','dr','lr','dy','dm','wh','mc','mg','mr','wh','mr','dr','lr','mb','dm','my','db','mb','lb','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], //  0
@@ -1000,32 +1004,33 @@ describe('Interpreter', () => {
               INPUTS      = ['a','b','5','G','M','6','b','a','d','l','a','n','d','s','0'],
               OUTPUT      = []
 
-      let count = 0,
-          halt = false
+        let count = 0,
+            halt  = false
 
-      while(!halt) {
-        const RES = INTERPRETER.step()
+        while(!halt) {
+            const RES = INTERPRETER.step()
 
-        if (RES.hasOwnProperty('prompt')) {
-          RES.prompt(INPUTS.shift())
+            if (RES.hasOwnProperty('prompt')) {
+                RES.prompt(INPUTS.shift())
+            }
+
+            if (RES.output) {
+                OUTPUT.push(RES.output)
+            }
+
+            // fullProgramDebug(INTERPRETER)
+
+            halt = RES.halt
+            count++
         }
 
-        if (RES.output) {
-          OUTPUT.push(RES.output)
-        }
+        const EXPECTED = ['T','h','x'],
+              ACTUAL   = OUTPUT
 
-        // fullProgramDebug(INTERPRETER)
-
-        halt = RES.halt
-        count++
-      }
-
-      const EXPECTED = ['T','h','x'],
-            ACTUAL = OUTPUT
-
-      assert.deepEqual(EXPECTED, ACTUAL)
+        assert.deepEqual(EXPECTED, ACTUAL)
     })
     it('runs a program with complicated IO and lots of black squares', () => {
+        // Asks for user input until '0' is give, then prints 'Thx'
         const SRC = mockSource(20,40,[
                 // 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32  
                 ['mr','mr','dr','lr','dy','dm','wh','mc','mg','mr','wh','mr','dr','lr','mb','dm','my','db','mb','lb','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','wh','mg','bl'], //  0
@@ -1049,44 +1054,43 @@ describe('Interpreter', () => {
               INPUTS      = ['a','b','5','G','M','6','b','a','d','l','a','n','d','s','0'],
               OUTPUT      = []
 
-      let count = 0,
-          halt = false
+        let count = 0,
+            halt  = false
 
-      while(!halt) {
-        const RES = INTERPRETER.step()
+        while(!halt) {
+            const RES = INTERPRETER.step()
 
-        if (RES.hasOwnProperty('prompt')) {
-          RES.prompt(INPUTS.shift())
+            if (RES.hasOwnProperty('prompt')) {
+                RES.prompt(INPUTS.shift())
+            }
+
+            if (RES.output) {
+                OUTPUT.push(RES.output)
+            }
+
+            // fullProgramDebug(INTERPRETER)
+
+            halt = RES.halt
+            count++
         }
 
-        if (RES.output) {
-          OUTPUT.push(RES.output)
-        }
+        const EXPECTED = ['T','h','x'],
+              ACTUAL   = OUTPUT
 
-        // fullProgramDebug(INTERPRETER)
-
-        halt = RES.halt
-        count++
-      }
-
-      const EXPECTED = ['T','h','x'],
-            ACTUAL = OUTPUT
-
-      assert.deepEqual(EXPECTED, ACTUAL)
+        assert.deepEqual(EXPECTED, ACTUAL)
     })
-  })
 })
 
 const ignoreInCharIOFunc = _ => {
-  const SRC = mockSource(20,20,[
-              ['mc','mg','mr','my']
-            ]),
-            INTERPRETER = new Interpreter(SRC)
+    const SRC = mockSource(20,20,[
+            ['mc','mg','mr','my']
+          ]),
+          INTERPRETER = new Interpreter(SRC)
 
-  let count = 0
+    let count = 0
 
-  while(count < 5) {
-    INTERPRETER.step()
-    count++
-  }
+    while(count < 5) {
+        INTERPRETER.step()
+        count++
+    }
 }
