@@ -100,9 +100,11 @@ export default class CommandViewer extends Component {
         return this.addCommandsToColorArray(arr)
     }
     addCommandsToColorArray(colorsArr) {
+        const COMMAND_ARR = COMMANDS.slice(0)
+
         return colorsArr.map((row,i) => {
             return row.map((c,j) => {
-                c.command = COMMANDS[i][j]
+                c.command = COMMAND_ARR[i][j]
                 return c
             })
         })

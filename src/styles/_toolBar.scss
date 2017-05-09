@@ -82,6 +82,7 @@ $sidebar--margin: 5px;
     flex: 1;
     @include flex();
     font-family: monospace;
+    font-size: 10px;
     box-sizing: border-box;
     border: 2px solid white;
     &:hover {

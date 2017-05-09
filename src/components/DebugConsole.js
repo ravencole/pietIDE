@@ -37,7 +37,15 @@ export default class DebugConsole extends Component {
                             Stack
                         </div>
                         <div className="stack--list">
-
+                            { 
+                                this.props.stack.map(n => {
+                                    return (
+                                        <div>
+                                            { n }
+                                        </div>
+                                    )
+                                }) 
+                            }
                         </div>
                     </div>
                 </div>

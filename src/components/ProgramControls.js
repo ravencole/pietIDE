@@ -7,13 +7,13 @@ export default class ProgramControls extends Component {
     render() {
         return (
             <div className="programControls--container">
-                <div className="programControls--btn" onClick={ this.props.runProgram }>
+                <div className="programControls--btn">
                     <img src="/svg/playBtn.svg" />
                 </div>
-                <div className="programControls--btn">
+                <div className="programControls--btn" onClick={ this.props.stepThroughProgram }>
                     <img src="/svg/stepBtn.svg" />
                 </div>
-                <div className="programControls--btn">
+                <div className="programControls--btn" onClick={ this.props.stopProgramExecution }>
                     <img src="/svg/stopBtn.svg" />
                 </div>
             </div>

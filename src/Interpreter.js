@@ -5,6 +5,8 @@ import {
     COLORS_BY_HEX
 } from './components/constants'
 
+const COMMANDS_ARR = COMMANDS.slice(0)
+
 export default class Interpreter {
     constructor(src) {
         this.src             = src
@@ -22,6 +24,7 @@ export default class Interpreter {
         this.operationPoint  = [0,0]
         this.previousCommand = 'no op'
         this.waitingForIO    = false
+        this.exitNode        = [0,0]
     }
     addOperation() {
         const FIRST_NUM  = this.stack.shift(),
@@ -238,7 +241,7 @@ export default class Interpreter {
         return COLORS_ARR.reduce((a,b,i) => {
             b.map((c,j) => {
                 if (c.hue === NEXT_HUE && c.lightness === NEXT_LIGHTNESS) {
-                    a = COMMANDS[i][j]
+                    a = COMMANDS_ARR[i][j]
                 }
             })
             return a
@@ -589,6 +592,7 @@ export default class Interpreter {
         this.previousColor = CURRENT_COLOR_NAME
         this.operationPoint = this.getNextOperationPoint(EXIT_NODE, PIXEL_GROUP)
         this.currentStep += 1
+        this.exitNode = EXIT_NODE
 
         if (this.attemptedMoves === 8) {
             RESPONSE.halt = true,

@@ -949,7 +949,19 @@ describe('step', () => {
 
     })
     it('throws an error when step is called but IO obligations are not fulfilled', () => {
-        assert.throws(ignoreInCharIOFunc)
+        assert.throws(_ => {
+            const SRC = mockSource(20,20,[
+                    ['mc','mg','mr','my']
+                  ]),
+                  INTERPRETER = new Interpreter(SRC)
+
+            let count = 0
+
+            while(count < 5) {
+                INTERPRETER.step()
+                count++
+            }
+        })
     })
     it('can run a simple program that uses all IO operations', () => {
         const SRC = mockSource(20,20,[
@@ -1080,17 +1092,3 @@ describe('step', () => {
         assert.deepEqual(EXPECTED, ACTUAL)
     })
 })
-
-const ignoreInCharIOFunc = _ => {
-    const SRC = mockSource(20,20,[
-            ['mc','mg','mr','my']
-          ]),
-          INTERPRETER = new Interpreter(SRC)
-
-    let count = 0
-
-    while(count < 5) {
-        INTERPRETER.step()
-        count++
-    }
-}

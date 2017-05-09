@@ -31,9 +31,11 @@ export default props => {
                 directionPointer={ props.directionPointer }
                 codelChooser={ props.codelChooser }
                 nextOp={ props.nextOp }
+                stack = { props.stack }
             />
             <ProgramControls 
-                runProgram = { props.runProgram }
+                stepThroughProgram = { props.stepThroughProgram }
+                stopProgramExecution = { props.stopProgramExecution }
             />
         </div>
     )

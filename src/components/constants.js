@@ -73,11 +73,11 @@ export const COLORS_ARRAY_NO_BW = (() => {
     return CANBW
 })()
 
-export const COLORS_BY_HEX = Object.keys(COLORS).reduce((a,b) => {
+export const COLORS_BY_HEX = (() => Object.keys(COLORS).reduce((a,b) => {
     a[COLORS[b]] = b
 
     return a
-}, {})
+}, {}))()
 
 export const COMMANDS = [
     [
@@ -140,9 +140,9 @@ export const COMMAND_DESCRIPTIONS = {
     duplicate: 'Pushes a copy of the top value on the stack on to the stack.',
     roll: 'Pops the top two values off the stack and "rolls" the remaining stack entries to a depth equal to the second value popped, by a number of rolls equal to the first value popped. A single roll to depth n is defined as burying the top value on the stack n deep and bringing all values above it up by 1 place. A negative number of rolls rolls in the opposite direction. A negative depth is an error and the command is ignored. If a roll is greater than an implementation-dependent maximum stack depth, it is handled as an implementation-dependent error, though simply ignoring the command is recommended.',
     'in(char)': ' Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack. If no input is waiting on STDIN, this is an error and the command is ignored. If an integer read does not receive an integer value, this is an error and the command is ignored.',
-    'in(int)': ' Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack. If no input is waiting on STDIN, this is an error and the command is ignored. If an integer read does not receive an integer value, this is an error and the command is ignored.',
+    'in(number)': ' Reads a value from STDIN as either a number or character, depending on the particular incarnation of this command and pushes it on to the stack. If no input is waiting on STDIN, this is an error and the command is ignored. If an integer read does not receive an integer value, this is an error and the command is ignored.',
     'out(char)': 'Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.',
-    'out(int)': 'Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.'
+    'out(number)': 'Pops the top value off the stack and prints it to STDOUT as either a number or character, depending on the particular incarnation of this command.'
 }
 
 export const SHORTCUT_LIST = {
@@ -160,7 +160,7 @@ export const SHORTCUT_LIST = {
     du: 'duplicate',
     ro: 'roll',
     ic: 'in(char)',
-    ii: 'in(int)',
+    ii: 'in(number)',
     oc: 'out(char)',
-    oi: 'out(int)'
+    oi: 'out(number)'
 }

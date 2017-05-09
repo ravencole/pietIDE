@@ -15,6 +15,12 @@ export default class Canvas extends Component {
                     width: this.props.cellSize + 'px'
                 }
 
+                const CLASS_NAMES = ['canvas--tile']
+
+                if (this.props.steppingThroughProgram && this.props.exitNode[1] === i && this.props.exitNode[0] === j) {
+                    CLASS_NAMES.push('exitNode')
+                }
+
                 if (tile.selected) {
                     STYLES.boxShadow = 'inset 0 0 9px deepskyblue'
                 }
@@ -24,7 +30,7 @@ export default class Canvas extends Component {
                         id={`tiles--${i}:${j}`}
                         key={`${i}${j}${i*j}`}
                         onClick={ e => this.props.handleTileClick(i,j,e.shiftKey,e.altKey) }
-                        className="canvas--tile" 
+                        className={ CLASS_NAMES.join(' ') }
                         style={STYLES}
                         onMouseOver={ e => this.props.onMouseOverTile({ x: j, y: i }, e) }
                         onMouseOut={ () => this.props.onMouseExitTile() }

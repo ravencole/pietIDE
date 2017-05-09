@@ -2,7 +2,10 @@ import React, { Component } from 'react'
 
 import Canvas from './components/Canvas'
 import ToolBar from './components/ToolBar'
-import { tokenize, gatherColorGroup } from './Tokenizer'
+// import { tokenize, gatherColorGroup } from './Tokenizer'
+import {
+    gatherColorGroup
+} from './helpers'
 import { 
     COMMANDS, 
     COLORS_ARRAY, 
@@ -10,6 +13,9 @@ import {
     COMMANDS_WITH_INDEX,
     SHORTCUT_LIST
 } from './components/constants'
+import Interpreter from './Interpreter'
+
+let INTERPRETER;
 
 export default class App extends Component {
     constructor(props) {
@@ -30,7 +36,10 @@ export default class App extends Component {
             mousedOverTileCoords: { x: null, y: null },
             inSelection: false,
             selectedTiles: [],
-            historySnapshot: []
+            historySnapshot: [],
+            stack: [],
+            steppingThroughProgram: false,
+            exitNode: [0,0]
         };
 
         [
@@ -51,6 +60,8 @@ export default class App extends Component {
             'renderNewCanvas',
             'replaceShortcut',
             'runPietProgram',
+            'stepThroughProgram',
+            'stopProgramExecution',
             'updateCanvasCellSize',
             'updateCanvasHeight',
             'updateCanvasWidth',
@@ -83,7 +94,9 @@ export default class App extends Component {
         }
     }
     alignColorsArrayToForeground(hue, lightness) {
-        const VALID_COLORS = COLORS_ARRAY.slice(0, COLORS_ARRAY.length - 1)
+        const COLORS_ARR   = COLORS_ARRAY.slice(0),
+              // VALID_COLORS = COLORS_ARR.slice(0, COLORS_ARR.length - 1)
+              VALID_COLORS = COLORS_ARR
 
         while(VALID_COLORS[0][0].hue !== hue) {
             const tmp = VALID_COLORS.shift()
@@ -136,6 +149,8 @@ export default class App extends Component {
               SORTED_COLORS = this.alignColorsArrayToForeground(HUE, LIGHTNESS),
               COMMAND       = SHORTCUT_LIST[pattern],
               [ X,Y ]       = COMMANDS_WITH_INDEX[COMMAND]
+
+        console.log(COMMAND)
 
         this.setState({
             currentForegroundColor: SORTED_COLORS[X][Y].hex,
@@ -261,18 +276,53 @@ export default class App extends Component {
         })
     }
     runPietProgram() {
-        const TOKENS = tokenize(
-            this.state.tiles,
-            {x: this.state.canvasColumns, y: this.state.canvasRows}
-        )
+        // const TOKENS = tokenize(
+        //     this.state.tiles,
+        //     {x: this.state.canvasColumns, y: this.state.canvasRows}
+        // )
 
-        // console.log(TOKENS)
+        // // console.log(TOKENS)
     }
     selectionCleanup() {
         return {
             inSelection: false,
             selectedTiles: []
         }
+    }
+    stepThroughProgram() {
+        if (!INTERPRETER) {
+            INTERPRETER = new Interpreter(this.state.tiles)
+            this.setState({
+                steppingThroughProgram: true
+            })
+        }
+
+        const RES = INTERPRETER.step()
+
+        if (RES.halt) {
+            alert('Your program has successfully halted')
+            return this.stopProgramExecution()
+        }
+
+        this.setState({
+            stack: INTERPRETER.stack,
+            directionPointer: INTERPRETER.dp,
+            codelChooser: INTERPRETER.cc,
+            nextOp: INTERPRETER.previousCommand,
+            exitNode: INTERPRETER.operationPoint
+        })
+    }
+    stopProgramExecution() {
+        INTERPRETER = null
+
+        this.setState({
+            stack: [],
+            directionPointer: 0,
+            codelChooser: 0,
+            nextOp: 'no op',
+            steppingThroughProgram: false,
+            exitNode: [0,0]
+        })
     }
     updateCanvasCellSize(cellSize) {
         this.setState({
@@ -306,21 +356,26 @@ export default class App extends Component {
                     directionPointer =                    { this.state.directionPointer }
                     mousedOverTileCoords =                { this.state.mousedOverTileCoords }
                     nextOp =                              { this.state.nextOp }
+                    stack =                               { this.state.stack }
                     
                     onPalletColorClick =                  { this.onPalletColorClick }
                     onSwapForeGroundAndBackgroundColors = { this.onSwapForeGroundAndBackgroundColors }
                     runPietProgram =                      { this.runPietProgram }
+                    stepThroughProgram =                  { this.stepThroughProgram }
+                    stopProgramExecution =                { this.stopProgramExecution }
                     updateCanvasCellSize =                { this.updateCanvasCellSize }
                     updateCanvasHeight =                  { this.updateCanvasHeight }
                     updateCanvasWidth =                   { this.updateCanvasWidth }
                 />
                 <Canvas 
-                    cellSize =        { this.state.cellSize }
-                    tileMap =         { this.state.tiles } 
+                    cellSize =               { this.state.cellSize }
+                    exitNode =               { this.state.exitNode }
+                    steppingThroughProgram = { this.state.steppingThroughProgram }
+                    tileMap =                { this.state.tiles } 
                     
-                    handleTileClick = { this.handleTileClick } 
-                    onMouseExitTile = { this.onMouseExitTile }
-                    onMouseOverTile = { this.onMouseOverTile }
+                    handleTileClick =        { this.handleTileClick } 
+                    onMouseExitTile =        { this.onMouseExitTile }
+                    onMouseOverTile =        { this.onMouseOverTile }
                 />
             </div>
         )
