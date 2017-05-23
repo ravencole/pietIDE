@@ -25,7 +25,7 @@ export default class DebugConsole extends Component {
                         </div>
                         <div className="direction--container">
                             <div className="direction--title">
-                                Next Operation
+                                Current Operation
                             </div>
                             <div className="direction--item">
                                 { this.props.nextOp }
@@ -38,10 +38,13 @@ export default class DebugConsole extends Component {
                         </div>
                         <div className="stack--list">
                             { 
-                                this.props.stack.map(n => {
+                                this.props.stack.map((n,i) => {
+                                    const STRING_VAL = String.fromCharCode(n),
+                                          VALID_STRING_CONVERSION = STRING_VAL.trim().length > 0
+
                                     return (
                                         <div>
-                                            { n }
+                                            { `[${i}]: ${n} ${ VALID_STRING_CONVERSION ? STRING_VAL : ' ' }` }
                                         </div>
                                     )
                                 }) 

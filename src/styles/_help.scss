@@ -1,0 +1,16 @@
+.help--container {
+    @include flex();
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: deepskyblue;
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    color: white;
+    font-family: monospace;
+    font-size: 20px;
+    &:hover {
+        cursor: pointer;
+    }
+}

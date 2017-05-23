@@ -1,8 +1,8 @@
 .canvas--container {
+    position: relative;
     height: 100%;
     width: 80%;
     @include flex();
-    // overflow: scroll;
     box-sizing: border-box;
     padding: 10px;
 }
@@ -42,4 +42,41 @@
     100% {
         box-shadow: inset 0 0 15px blue;
     }
+}
+
+.io--container {
+    position: absolute;
+    right: 0;
+    height: 70px;
+    bottom: -100%;
+    width: 100%;
+    @include flex(center, flex-start, column);
+    transition: all 600ms ease;
+    box-shadow: 0 0 30px 0 black;
+    box-sizing: border-box;
+    padding: 10px 20px 20px 20px;
+    & input {
+        height: 20px;
+        width: 100%;
+        font-size: 17px;
+        @include flex(center, flex-start);
+    }
+    & label {
+        width: 100%;
+        font-size: 15px;
+        font-family: monospace;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+}
+
+.outputConsole--container {
+    position: absolute;
+    height: 40px;
+    width: 100%;
+    right: 0;
+    background-color: white;box-shadow: 0 0 30px 0 black;
+    box-sizing: border-box;
+    padding: 10px 20px 20px 20px;
+    transition: all 600ms ease;
 }

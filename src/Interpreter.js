@@ -49,6 +49,15 @@ export default class Interpreter {
 
         return COLORS_ARR
     }
+    commandDeliveredIOObligations(res) {
+        return res !== null && 
+               typeof res === 'object' && 
+               (
+                    res.hasOwnProperty('output') || 
+                    (res.hasOwnProperty('prompt') && typeof res.prompt === 'function')
+               )
+
+    }
     divideOperation() {
         if (this.stack.length < 2)
             return
@@ -419,16 +428,26 @@ export default class Interpreter {
             this.waitingForIO = false
         }
 
-        return { prompt }
+        return { 
+            prompt,
+            type: 'Char'
+        }
     }
     innumberOperation() {
         this.waitingForIO = true
+
         const prompt = input => {
+            if (input === undefined)
+                throw new Error(`a valid input is required`)
+
             this.stack.unshift(+input)
             this.waitingForIO = false
         }
 
-        return { prompt }
+        return { 
+            prompt,
+            type: 'Number'
+        }
     }
     run() {
         
@@ -505,7 +524,8 @@ export default class Interpreter {
         this.stack.unshift(this.tmpRegister)
     }
     rollOperation() {
-        let rolls   = this.stack.shift()
+        let rolls = this.stack.shift()
+        
         const DEPTH = this.stack.shift()
 
         if (DEPTH < 0 || DEPTH > this.stack.length)
@@ -567,13 +587,12 @@ export default class Interpreter {
         if (COMMAND !== 'no op') {
             const IO = this.executeOperation(COMMAND)
 
-            if (
-                IO !== null && 
-                typeof IO === 'object' && 
-                IO.hasOwnProperty('prompt') &&
-                typeof IO.prompt === 'function'
-            ) {
-                RESPONSE.prompt = IO.prompt
+            if (IO !== null &&
+                typeof IO === 'object' &&
+                IO.hasOwnProperty('prompt')
+            ){
+                RESPONSE.prompt     = IO.prompt
+                RESPONSE.promptType = IO.type
             }
 
             if (

@@ -251,6 +251,8 @@ $sidebar--margin: 5px;
         background-color: $toolBar--background;
         color: white;
         min-height: 70px;
+        max-height: 70px;
+        overflow: scroll;
         @include flex(flex-start, flex-start, column);
         padding-left: 5px;
     }

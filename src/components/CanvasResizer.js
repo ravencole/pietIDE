@@ -7,7 +7,7 @@ export default class CanvasResizer extends Component {
         this.state = {
             height: this.props.canvasHeight,
             width: this.props.canvasWidth,
-            cellSize: 10
+            cellSize: this.props.cellSize
         }
 
         this.onHeightChange =

@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 
 import CanvasTile from './CanvasTile'
+import UserInput from './UserInput'
+import OutputConsole from './OutputConsole'
 
 export default class Canvas extends Component {
     constructor(props) {
@@ -17,7 +19,7 @@ export default class Canvas extends Component {
 
                 const CLASS_NAMES = ['canvas--tile']
 
-                if (this.props.steppingThroughProgram && this.props.exitNode[1] === i && this.props.exitNode[0] === j) {
+                if (this.props.steppingThroughProgram && this.props.previousCell[1] === i && this.props.previousCell[0] === j) {
                     CLASS_NAMES.push('exitNode')
                 }
 
@@ -57,6 +59,17 @@ export default class Canvas extends Component {
                         renderCanvas
                     }
                 </div>
+                <UserInput 
+                    callback =           { this.props.getUserIOHandler } 
+                    type =               { this.props.getUserIOInputType } 
+                    showIOConsole =      { this.props.showIOConsole }
+                    getUserIOInput =     { this.props.getUserIOInput }
+                    backgroundColor =    { this.props.currentExitNodeColor }
+                />
+                <OutputConsole
+                    showIOConsole =      { this.props.showIOConsole }
+                    outputConsoleValue = { this.props.outputConsoleValue }
+                />
             </div>
         )
     }

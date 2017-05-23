@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 
 import Canvas from './components/Canvas'
 import ToolBar from './components/ToolBar'
-// import { tokenize, gatherColorGroup } from './Tokenizer'
+import Help from './components/Help'
 import {
     gatherColorGroup
 } from './helpers'
 import { 
     COMMANDS, 
-    COLORS_ARRAY, 
+    COLORS_ARRAY as colorsArray, 
     COLORS_BY_HEX,
     COMMANDS_WITH_INDEX,
     SHORTCUT_LIST
@@ -17,14 +17,16 @@ import Interpreter from './Interpreter'
 
 let INTERPRETER;
 
+const COLORS_ARRAY = colorsArray()
+
 export default class App extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
-            canvasRows: 10,
-            canvasColumns: 10,
-            cellSize: 30,
+            canvasRows: 20,
+            canvasColumns: 20,
+            cellSize: 20,
             commandColors: [],
             commandsWithMethods: [],
             currentForegroundColor: '#FFF',
@@ -39,16 +41,28 @@ export default class App extends Component {
             historySnapshot: [],
             stack: [],
             steppingThroughProgram: false,
-            exitNode: [0,0]
+            exitNode: [0,0],
+            output: [],
+            getUserIOInput: false,
+            getUserIOCallback: null,
+            getUserIOInputType: null,
+            showIOConsole: true,
+            previousCell: [0,0],
+            outputConsoleValue: ''
         };
 
         [
+            'addCanvasRows',
+            'addCanvasColumns',
             'addColorIntoSelectGroup',
             'addColorIntoTile',
             'destroySelection',
             'executeShortcut',
             'forgroundAndBackgroundColorsToDefault',
+            'getUserInput',
+            'getUserIOHandler',
             'handleGroupSelection',
+            'handleInterpreterPromptForInput',
             'handleSelectionAction',
             'handleSelectionClick',
             'handleTileClick',
@@ -57,6 +71,7 @@ export default class App extends Component {
             'onMouseOverTile',
             'onPalletColorClick',
             'onSwapForeGroundAndBackgroundColors',
+            'outputIOStream',
             'renderNewCanvas',
             'replaceShortcut',
             'runPietProgram',
@@ -67,6 +82,56 @@ export default class App extends Component {
             'updateCanvasWidth',
             'updateHistory'
         ].map(m => this[m] = this[m].bind(this))
+    }
+    addCanvasRows() {
+        const TILES = this.state.tiles,
+              NEW_TILES = [...Array(this.state.canvasRows - TILES.length)].map( _ => {
+                return [...Array(this.state.canvasColumns)].map( _ => {
+                    return { color: '#FFF' }
+                })
+              }),
+              TILE_MAP = [...TILES,...NEW_TILES]
+
+        TILE_MAP.map((row, i) => {
+            return row.map((col,j) => {
+                if (!col.hasOwnProperty('loc')) {
+                    col.loc = {
+                        x: j,
+                        y: i
+                    }
+                }
+                return col
+            })
+        })
+
+        this.setState({
+            tiles: TILE_MAP
+        })
+    }
+    addCanvasColumns() {
+        const TILE_MAP = this.state.tiles,
+              SIZED_MAP = TILE_MAP.map((row, i) => {
+                            return [...row, ...Array(this.state.canvasColumns - TILE_MAP[0].length)]
+                          }),
+              POPULATED_MAP = SIZED_MAP.map((row,i) => {
+                                    return row.map((col,j) => {
+                                        if (col === undefined) {
+                                            col = {
+                                                color: '#FFF',
+                                                loc: {
+                                                    x: j,
+                                                    y: i
+                                                }
+                                            }
+                                        }
+                                        return col
+                                    })
+                                })
+
+        console.log(POPULATED_MAP[0].length)
+        this.setState({
+            tiles: POPULATED_MAP
+        })
     }
     addColorIntoSelectGroup() {
         const TILES = this.state.tiles
@@ -94,9 +159,8 @@ export default class App extends Component {
         }
     }
     alignColorsArrayToForeground(hue, lightness) {
-        const COLORS_ARR   = COLORS_ARRAY.slice(0),
-              // VALID_COLORS = COLORS_ARR.slice(0, COLORS_ARR.length - 1)
-              VALID_COLORS = COLORS_ARR
+        const VALID_COLORS = [...COLORS_ARRAY]
+                                .slice(0,COLORS_ARRAY.length - 1)
 
         while(VALID_COLORS[0][0].hue !== hue) {
             const tmp = VALID_COLORS.shift()
@@ -150,7 +214,6 @@ export default class App extends Component {
               COMMAND       = SHORTCUT_LIST[pattern],
               [ X,Y ]       = COMMANDS_WITH_INDEX[COMMAND]
 
-        console.log(COMMAND)
 
         this.setState({
             currentForegroundColor: SORTED_COLORS[X][Y].hex,
@@ -164,6 +227,22 @@ export default class App extends Component {
             shortcutSequence: ''
         })
     }
+    getUserInput(res) {
+        this.setState({
+            getUserIOInput: true,
+            getUserIOCallback: res.prompt,
+            getUserIOInputType: res.type
+        });
+    }
+    getUserIOHandler(input) {
+        const CB = this.state.getUserIOCallback
+        this.setState({
+            getUserIOInput: false,
+            getUserIOCallback: null,
+            getUserIOInputType: null
+        })
+        CB(input)
+    }
     handleGroupSelection(i,j) {
         const TILES = this.state.tiles,
               SELECTED_TILES = gatherColorGroup(i,j,TILES)
@@ -175,6 +254,11 @@ export default class App extends Component {
         })
 
         return { tiles: TILES }
+    }
+    handleInterpreterPromptForInput(res) {
+        return res.hasOwnProperty('prompt') ?
+                    this.getUserInput(res) :
+                    this.outputIOStream(res)   
     }
     handleSelectionAction(i,j) {
         const CLICK_IS_IN_SELECTION = this.state.selectedTiles.includes(`${i}:${j}`)
@@ -253,7 +337,17 @@ export default class App extends Component {
             shortcutSequence: ''
         })
     }
+    outputIOStream(res) {
+        console.log(res.output)
+        this.setState({
+            showIOConsole: true,
+            outputConsoleValue: `${this.state.outputConsoleValue}${res.output}`
+        })
+    }
     renderNewCanvas() {
+        if (!!(this.state.tiles.length) && !window.confirm('This operation will destroy all of the work currently on the canvas. Are you sure you want to perform this operation?')) {
+            return
+        }
         const TILE_MAP = [...Array(this.state.canvasRows)].map((_,i) => {
             return [...Array(this.state.canvasColumns)].map((_,j) => {
                 return {
@@ -290,14 +384,24 @@ export default class App extends Component {
         }
     }
     stepThroughProgram() {
+        if (this.state.getUserIOInput) 
+            return
+
         if (!INTERPRETER) {
             INTERPRETER = new Interpreter(this.state.tiles)
             this.setState({
-                steppingThroughProgram: true
+                steppingThroughProgram: true,
             })
         }
 
+        this.setState({
+            previousCell: this.state.exitNode
+        })
+
         const RES = INTERPRETER.step()
+
+        if (RES.hasOwnProperty('prompt') || RES.hasOwnProperty('output'))
+            this.handleInterpreterPromptForInput(RES)
 
         if (RES.halt) {
             alert('Your program has successfully halted')
@@ -321,23 +425,36 @@ export default class App extends Component {
             codelChooser: 0,
             nextOp: 'no op',
             steppingThroughProgram: false,
-            exitNode: [0,0]
+            exitNode: [0,0],
+            getUserIOInput: false,
+            getUserIOCallback: null,
+            getUserIOInputType: null,
+            outputConsoleValue: '',
+            showIOConsole: false
         })
     }
     updateCanvasCellSize(cellSize) {
         this.setState({
             cellSize: +cellSize
-        }, this.renderNewCanvas )
+        })
     }
     updateCanvasHeight(height) {
+        const CB = height > this.state.canvasRows ? 
+                      this.addCanvasRows : 
+                      this.renderNewCanvas
+
         this.setState({
             canvasRows: +height
-        }, this.renderNewCanvas )
+        }, CB )
     }
     updateCanvasWidth(width) {
+        const CB = width > this.state.canvasColumns ?
+                      this.addCanvasColumns :
+                      this.renderNewCanvas
+
         this.setState({
             canvasColumns: +width
-        }, this.renderNewCanvas )
+        }, CB )
     }
     updateHistory(nextState) {
         this.setState(nextState)
@@ -370,13 +487,23 @@ export default class App extends Component {
                 <Canvas 
                     cellSize =               { this.state.cellSize }
                     exitNode =               { this.state.exitNode }
+                    previousCell =           { this.state.previousCell }
                     steppingThroughProgram = { this.state.steppingThroughProgram }
                     tileMap =                { this.state.tiles } 
+                    getUserIOInput =         { this.state.getUserIOInput }
+                    getUserIOInputType =     { this.state.getUserIOInputType }
+                    showIOConsole =          { this.state.showIOConsole }
+                    outputConsoleValue =     { this.state.outputConsoleValue }
+                    currentExitNodeColor =   { 
+                        this.state.tiles[this.state.previousCell[1]][this.state.previousCell[0]].color
+                    }
                     
                     handleTileClick =        { this.handleTileClick } 
+                    getUserIOHandler =       { this.getUserIOHandler }
                     onMouseExitTile =        { this.onMouseExitTile }
                     onMouseOverTile =        { this.onMouseOverTile }
                 />
+                <Help />
             </div>
         )
     }

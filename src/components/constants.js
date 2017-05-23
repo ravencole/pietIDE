@@ -50,8 +50,8 @@ export const COLORS_BY_SHORTCUT = {
     wh: 'white'
 }
 
-export const COLORS_ARRAY = (() => 
-    Object.keys(COLORS).reduce((a,b) => {
+export const COLORS_ARRAY = () => {
+    return Object.keys(COLORS).reduce((a,b) => {
         if (a[a.length - 1].length >= 3) {
             a.push([])
         }
@@ -65,10 +65,10 @@ export const COLORS_ARRAY = (() =>
 
         return a
     }, [[]])
-)()
+}
 
 export const COLORS_ARRAY_NO_BW = (() => {
-    const CANBW = COLORS_ARRAY
+    const CANBW = COLORS_ARRAY().slice(0)
     CANBW.pop()
     return CANBW
 })()

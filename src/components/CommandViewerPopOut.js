@@ -25,23 +25,18 @@ export default props => {
 
         if (IS_BORDER_TRANSITION) {
             if (MODAL_IS_HIDDEN) {
-                console.log(`1`)
                 e.target.style.zIndex = -1
                 e.target.style.transitionTimingFunction = EASE_OUT
             } else {
-                console.log(`2`)
                 e.target.style.transitionTimingFunction = EASE_IN
             }
         } else if (IS_LEFT_TRANSITION) {
             if (!MODAL_IS_HIDDEN) {
-                console.log(`3`)
                 e.target.style.zIndex = 1
             } else {
-                console.log(`4`)
                 props.onModalTransitionEnd()
             }
         }
-        console.log('end', e.propertyName)
     }
 
     return (

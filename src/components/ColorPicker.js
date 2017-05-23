@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
 
-import { COLORS_ARRAY } from './constants'
+import { COLORS_ARRAY as colorsArray } from './constants'
 
-const COLORS_ARR = COLORS_ARRAY.slice(0)
+const COLORS_ARRAY = colorsArray()
 
 export default props => {
     return (
         <div className="colorPicker--container">
             <div className="colorPicker--pallet">
                 {
-                    COLORS_ARR.map( (row,i) => {
+                    COLORS_ARRAY.map( (row,i) => {
                         return (
                             <div className="pallet--row" key={`palletRow${i}`}>
                                 {

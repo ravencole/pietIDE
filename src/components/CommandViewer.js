@@ -109,7 +109,10 @@ export default class CommandViewer extends Component {
             })
         })
     }
-    onInfoClick(command, hex) {
+    onInfoClick(command, hex, e) {
+        if (!e.altKey && !this.state.infoModalIsVisible) {
+            return this.props.onPalletColorClick(hex)
+        }
         if (this.state.currentColor !== '#FFF' && this.state.currentColor !== '#000') {
             this.setState({
                 infoModalIsVisible: true,
@@ -142,8 +145,8 @@ export default class CommandViewer extends Component {
                         onClick={ 
                             !!(elm.command.trim().length) && 
                             elm.command !== this.state.currentInfoTopic ?
-                                () => this.onInfoClick(elm.command, elm.hex) :
-                                () => this.onInfoClose()
+                                (e) => this.onInfoClick(elm.command, elm.hex, e) :
+                                ()  => this.onInfoClose()
                         }
                     >
                         { elm.command }

@@ -18,10 +18,12 @@ export default props => {
             />
             <CommandViewer 
                 currentForegroundColor={ props.currentForegroundColor }
+                onPalletColorClick = { props.onPalletColorClick }
             />
             <CanvasResizer 
                 canvasHeight={ props.canvasHeight }
                 canvasWidth={ props.canvasWidth }
+                cellSize={ props.cellSize }
                 updateCanvasWidth={ props.updateCanvasWidth }
                 updateCanvasHeight={props.updateCanvasHeight}
                 updateCanvasCellSize={props.updateCanvasCellSize}
