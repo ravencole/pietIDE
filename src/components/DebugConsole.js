@@ -3,6 +3,17 @@ import React, { Component } from 'react'
 export default class DebugConsole extends Component {
     constructor(props) {
         super(props)
+
+        this.state = {
+            pinned: true
+        }
+
+        this.onStackDisplayClick = this.onStackDisplayClick.bind(this)
+    }
+    onStackDisplayClick() {
+        this.setState({
+            pinned: !this.state.pinned
+        })
     }
     render() {
         return (
@@ -36,7 +47,21 @@ export default class DebugConsole extends Component {
                         <div className="stack--title">
                             Stack
                         </div>
-                        <div className="stack--list">
+                        <div className={ this.state.pinned ? "stack--list__pinned stack--list__pinned__active" : "stack--list__pinned" } onClick={ this.onStackDisplayClick }>
+                            { 
+                                this.props.stack.map((n,i) => {
+                                    const STRING_VAL = String.fromCharCode(n),
+                                          VALID_STRING_CONVERSION = STRING_VAL.trim().length > 0
+
+                                    return (
+                                        <div>
+                                            { `[${i}]: ${n} ${ VALID_STRING_CONVERSION ? STRING_VAL : ' ' }` }
+                                        </div>
+                                    )
+                                }) 
+                            }
+                        </div>
+                        <div className={ this.state.pinned ? "stack--list__unpinned" : "stack--list__unpinned stack--list__unpinned__active" } onClick={ this.onStackDisplayClick }>
                             { 
                                 this.props.stack.map((n,i) => {
                                     const STRING_VAL = String.fromCharCode(n),

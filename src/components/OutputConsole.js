@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+ 
 export default class OutputConsole extends Component {
     constructor(props) {
         super(props)
@@ -9,12 +9,9 @@ export default class OutputConsole extends Component {
     render() {
         return (
             <div
-                className="outputConsole--container"
-                style={{
-                    top: this.props.showIOConsole ? 0 : -70
-                }}
+                className="iocontainer__output"
             >
-                { this.props.outputConsoleValue }
+                Output: { this.props.outputConsoleValue }
             </div>
         );
     }

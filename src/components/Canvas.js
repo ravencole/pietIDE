@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
 
 import CanvasTile from './CanvasTile'
-import UserInput from './UserInput'
-import OutputConsole from './OutputConsole'
+import IOContainer from './IOContainer'
 
 export default class Canvas extends Component {
     constructor(props) {
@@ -59,16 +58,14 @@ export default class Canvas extends Component {
                         renderCanvas
                     }
                 </div>
-                <UserInput 
-                    callback =           { this.props.getUserIOHandler } 
-                    type =               { this.props.getUserIOInputType } 
+                <IOContainer
+                    getUserIOHandler =           { this.props.getUserIOHandler } 
+                    getUserIOInputType =               { this.props.getUserIOInputType } 
                     showIOConsole =      { this.props.showIOConsole }
                     getUserIOInput =     { this.props.getUserIOInput }
-                    backgroundColor =    { this.props.currentExitNodeColor }
-                />
-                <OutputConsole
-                    showIOConsole =      { this.props.showIOConsole }
+                    currentExitNodeColor =    { this.props.currentExitNodeColor }
                     outputConsoleValue = { this.props.outputConsoleValue }
+                    toggleIOConsoleVisibility = { this.props.toggleIOConsoleVisibility }
                 />
             </div>
         )

@@ -11,6 +11,24 @@ $sidebar--margin: 5px;
     box-shadow: 0 0 40px 0 rgba(0,0,0,0.5);
     @include flex(center, flex-start, column);
     z-index: 10;
+    position: relative;
+    transition: all 400ms ease;
+    &__tab {
+        position: absolute;
+        top: 0;
+        right: -40px;
+        height: 50px;
+        width: 30px;
+        border-radius: 0 5px 5px 0;
+        background-color: white;
+        padding-right: 10px;
+        @include flex();
+        & img {
+            height: 30px;
+            width: auto;
+            transition: all 300ms ease;
+        }       
+    }
 }
 
 .colorPicker--container {
@@ -145,6 +163,7 @@ $sidebar--margin: 5px;
 .canvasResizer--container {
     @extend .toolbarBorderRadius;
     margin-top: $sidebar--margin;
+    flex-grow: 1;
     width: 100%;
     box-sizing: border-box;
     font-family: monospace;
@@ -177,6 +196,7 @@ $sidebar--margin: 5px;
     width: 100%;
     background-color: white;
     padding: 5px;
+    flex-grow: 1;
     font-family: monospace;
     box-sizing: border-box;
     margin-top: $sidebar--margin;
@@ -199,7 +219,7 @@ $sidebar--margin: 5px;
 .debug--container {
     @extend .toolbarBorderRadius;
     margin-top: $sidebar--margin;
-    flex-grow: 1;
+    height: 22%;
     width: 100%;
     background-color: white;
     font-family: monospace;
@@ -208,7 +228,7 @@ $sidebar--margin: 5px;
 
 .debugInfo--container {
     width: 100%;
-    flex-grow: 1;
+    height: 100%;
     @include flex(flex-start);
 }
 
@@ -240,21 +260,52 @@ $sidebar--margin: 5px;
 .stack--container {
     margin-top: 5px;
     @include flex(center, flex-start, column);
+    height: 100%;
     & .stack--title {
         font-weight: bold;
         width: 100%;
         text-align: center;
     }
-    & .stack--list {
+    & .stack--list__pinned {
+        transition: all 300ms ease;
         margin-top: 5px;
         width: 90%;
         background-color: $toolBar--background;
         color: white;
+        height: 80%;
         min-height: 70px;
-        max-height: 70px;
-        overflow: scroll;
+        max-height: 100%;
+        overflow-y: scroll;
+        overflow-x: hidden;
         @include flex(flex-start, flex-start, column);
         padding-left: 5px;
+        opacity: 0;
+        &__active {
+            opacity: 100;
+        }
+        &:hover {
+            cursor: pointer;
+        }
+    }
+    & .stack--list__unpinned {
+        transition: all 300ms ease;
+        position: fixed;
+        top: 0;
+        right: -170px;
+        width: 160px;
+        height: 100%;
+        background-color: $toolBar--background;
+        color: white;
+        @include flex(flex-start, flex-start, column);
+        padding: 15px;
+        box-sizing: border-box;
+        box-shadow: 0 0 40px 0 rgba(0,0,0,0.5);
+        &__active {
+            right: 0;
+        }
+        &:hover {
+            cursor: pointer;
+        }
     }
 }
 

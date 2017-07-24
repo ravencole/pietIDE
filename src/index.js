@@ -1,9 +1,10 @@
 import { render } from 'react-dom'
 import React, { Component } from 'react'
+import path from 'path'
 
 import App from './App'
 
-require('./styles/app.scss')
+import './styles/app.scss';
 
 render(
     <App />,

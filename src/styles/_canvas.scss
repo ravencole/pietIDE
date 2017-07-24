@@ -44,39 +44,68 @@
     }
 }
 
-.io--container {
-    position: absolute;
-    right: 0;
-    height: 70px;
-    bottom: -100%;
+.iocontainer__container {
     width: 100%;
-    @include flex(center, flex-start, column);
+    position: absolute;
+    left: 0;
+    height: 100px;
+    @include flex(center, center, column);
+    transition: all 300ms ease;
+    & > *:first-child {
+        border-bottom: 1px solid black;
+    }
+}
+
+.iocontainer__input {
+    right: 0;
+    height: 50%;
+    width: 100%;
+    @include flex(center, flex-start, row);
     transition: all 600ms ease;
-    box-shadow: 0 0 30px 0 black;
     box-sizing: border-box;
-    padding: 10px 20px 20px 20px;
+    padding-left: 10px;
     & input {
         height: 20px;
-        width: 100%;
+        width: 80%;
         font-size: 17px;
-        @include flex(center, flex-start);
+        border-bottom: 1px solid black;
     }
     & label {
-        width: 100%;
         font-size: 15px;
         font-family: monospace;
-        margin-bottom: 5px;
+        margin-right: 5px;
         font-weight: bold;
     }
 }
 
-.outputConsole--container {
-    position: absolute;
-    height: 40px;
+.iocontainer__output {
+    @include flex(center, flex-start);
+    height: 50%;
     width: 100%;
-    right: 0;
-    background-color: white;box-shadow: 0 0 30px 0 black;
+    font-size: 15px;
+    font-family: monospace;
+    font-weight: bold;
+    background-color: white;
     box-sizing: border-box;
-    padding: 10px 20px 20px 20px;
+    padding-left: 10px;
     transition: all 600ms ease;
+}
+
+.iocontainer__toggleSwitch {
+    position: absolute;
+    top: -30px;
+    height: 30px;
+    width: 30px;
+    left: 10px;
+    background-color: white;
+    @include flex();
+    border-radius: 5px 5px 0 0;
+    &:hover {
+        cursor: pointer;
+    }
+    & img {
+        height: 20px;
+        width: auto;
+        transition: all 300ms ease;
+    }
 }

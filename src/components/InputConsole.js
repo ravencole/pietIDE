@@ -23,7 +23,9 @@ export default class UserInput extends Component {
         }
     }
     onChange(e) {
-        const TYPE = this.props.getUserIOInputType
+        const TYPE = this.props.type
+
+        console.log(this.props.type)
 
         if (TYPE === 'Char') {
             this.setState({
@@ -47,13 +49,12 @@ export default class UserInput extends Component {
     render() {
         return (
             <div 
-                className="io--container" 
+                className="iocontainer__input" 
                 style={{
-                    bottom: this.props.getUserIOInput ? 0 : '-100%',
                     backgroundColor: this.props.backgroundColor
                 }}
             >
-                <label>Input a { this.props.getUserIOInputType === 'Char' ? 'Character' : 'Number' }:</label>
+                <label>Input a { this.props.type === 'Char' ? 'Character' : 'Number' }:</label>
                 <input 
                     type="text" 
                     onKeyDown={ this.onKeyDown } 

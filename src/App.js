@@ -27,28 +27,28 @@ export default class App extends Component {
             canvasRows: 20,
             canvasColumns: 20,
             cellSize: 20,
+            codelChooser: 0,
             commandColors: [],
             commandsWithMethods: [],
             currentForegroundColor: '#FFF',
             currentBackgroundColor: '#000',
             directionPointer: 0,
-            codelChooser: 0,
-            nextOp: 'no op',
-            tiles: [],
-            mousedOverTileCoords: { x: null, y: null },
-            inSelection: false,
-            selectedTiles: [],
+            exitNode: [0,0],
+            getUserIOCallback: null,
+            getUserIOInput: false,
+            getUserIOInputType: null,
             historySnapshot: [],
+            inSelection: false,
+            mousedOverTileCoords: { x: null, y: null },
+            nextOp: 'no op',
+            output: [],
+            outputConsoleValue: '',
+            previousCell: [0,0],
+            selectedTiles: [],
+            showIOConsole: false,
             stack: [],
             steppingThroughProgram: false,
-            exitNode: [0,0],
-            output: [],
-            getUserIOInput: false,
-            getUserIOCallback: null,
-            getUserIOInputType: null,
-            showIOConsole: true,
-            previousCell: [0,0],
-            outputConsoleValue: ''
+            tiles: []
         };
 
         [
@@ -62,7 +62,7 @@ export default class App extends Component {
             'getUserInput',
             'getUserIOHandler',
             'handleGroupSelection',
-            'handleInterpreterPromptForInput',
+            'handleInterpreterPromptForIO',
             'handleSelectionAction',
             'handleSelectionClick',
             'handleTileClick',
@@ -77,6 +77,7 @@ export default class App extends Component {
             'runPietProgram',
             'stepThroughProgram',
             'stopProgramExecution',
+            'toggleIOConsoleVisibility',
             'updateCanvasCellSize',
             'updateCanvasHeight',
             'updateCanvasWidth',
@@ -128,7 +129,6 @@ export default class App extends Component {
                                     })
                                 })
 
-        console.log(POPULATED_MAP[0].length)
         this.setState({
             tiles: POPULATED_MAP
         })
@@ -231,7 +231,7 @@ export default class App extends Component {
         this.setState({
             getUserIOInput: true,
             getUserIOCallback: res.prompt,
-            getUserIOInputType: res.type
+            getUserIOInputType: res.promptType
         });
     }
     getUserIOHandler(input) {
@@ -239,7 +239,7 @@ export default class App extends Component {
         this.setState({
             getUserIOInput: false,
             getUserIOCallback: null,
-            getUserIOInputType: null
+            getUserIOInputType: null,
         })
         CB(input)
     }
@@ -255,7 +255,7 @@ export default class App extends Component {
 
         return { tiles: TILES }
     }
-    handleInterpreterPromptForInput(res) {
+    handleInterpreterPromptForIO(res) {
         return res.hasOwnProperty('prompt') ?
                     this.getUserInput(res) :
                     this.outputIOStream(res)   
@@ -287,7 +287,6 @@ export default class App extends Component {
                                        this.handleSelectionAction(i,j) :
                                        this.addColorIntoTile(i,j)
 
-
         this.updateHistory(NEXT_STATE)
     }
     onAppKeydown(e) {
@@ -297,25 +296,22 @@ export default class App extends Component {
             const PATTERN = this.state.shortcutSequence + String.fromCharCode(KEY_CODE).toLowerCase(),
                   SHORTCUT_EXISTS = SHORTCUT_LIST.hasOwnProperty(PATTERN)
 
-            if (SHORTCUT_EXISTS) {
+            if (SHORTCUT_EXISTS) 
                 return this.executeShortcut(PATTERN)
-            }
 
-            if (PATTERN === 'xx') {
+            if (PATTERN === 'xx') 
                 this.onSwapForeGroundAndBackgroundColors()
-            }
 
-            if (PATTERN === 'dd') {
+            if (PATTERN === 'dd') 
                 this.forgroundAndBackgroundColorsToDefault()
-            }
 
             this.replaceShortcut(KEY_CODE)
         }
     }
     onMouseOverTile(coords, event) {
-        if (this.state.inSelection && event.shiftKey) {
+        if (this.state.inSelection && event.shiftKey) 
             return this.handleTileClick(coords.y, coords.x, event.shiftKey)
-        }
+        
         this.setState({
             mousedOverTileCoords: { x: coords.x, y: coords.y }
         })
@@ -339,15 +335,21 @@ export default class App extends Component {
     }
     outputIOStream(res) {
         console.log(res.output)
+
         this.setState({
             showIOConsole: true,
             outputConsoleValue: `${this.state.outputConsoleValue}${res.output}`
         })
     }
     renderNewCanvas() {
-        if (!!(this.state.tiles.length) && !window.confirm('This operation will destroy all of the work currently on the canvas. Are you sure you want to perform this operation?')) {
+        const CONFIRMATION_MESSAGE = `\
+            This operation will destroy all of the work currently on the canvas.\ 
+            Are you sure you want to resize the canvas?`
+
+        if (this.state.tiles.length && !window.confirm(CONFIRMATION_MESSAGE)) {
             return
         }
+
         const TILE_MAP = [...Array(this.state.canvasRows)].map((_,i) => {
             return [...Array(this.state.canvasColumns)].map((_,j) => {
                 return {
@@ -401,7 +403,7 @@ export default class App extends Component {
         const RES = INTERPRETER.step()
 
         if (RES.hasOwnProperty('prompt') || RES.hasOwnProperty('output'))
-            this.handleInterpreterPromptForInput(RES)
+            this.handleInterpreterPromptForIO(RES)
 
         if (RES.halt) {
             alert('Your program has successfully halted')
@@ -431,6 +433,12 @@ export default class App extends Component {
             getUserIOInputType: null,
             outputConsoleValue: '',
             showIOConsole: false
+        })
+    }
+    toggleIOConsoleVisibility() {
+        console.log(666)
+        this.setState({
+            showIOConsole: !this.state.showIOConsole
         })
     }
     updateCanvasCellSize(cellSize) {
@@ -485,25 +493,27 @@ export default class App extends Component {
                     updateCanvasWidth =                   { this.updateCanvasWidth }
                 />
                 <Canvas 
-                    cellSize =               { this.state.cellSize }
-                    exitNode =               { this.state.exitNode }
-                    previousCell =           { this.state.previousCell }
-                    steppingThroughProgram = { this.state.steppingThroughProgram }
-                    tileMap =                { this.state.tiles } 
-                    getUserIOInput =         { this.state.getUserIOInput }
-                    getUserIOInputType =     { this.state.getUserIOInputType }
-                    showIOConsole =          { this.state.showIOConsole }
-                    outputConsoleValue =     { this.state.outputConsoleValue }
-                    currentExitNodeColor =   { 
-                        this.state.tiles[this.state.previousCell[1]][this.state.previousCell[0]].color
+                    cellSize =                  { this.state.cellSize }
+                    exitNode =                  { this.state.exitNode }
+                    getUserIOInput =            { this.state.getUserIOInput }
+                    getUserIOInputType =        { this.state.getUserIOInputType }
+                    outputConsoleValue =        { this.state.outputConsoleValue }
+                    previousCell =              { this.state.previousCell }
+                    showIOConsole =             { this.state.showIOConsole }
+                    steppingThroughProgram =    { this.state.steppingThroughProgram }
+                    tileMap =                   { this.state.tiles } 
+                    currentExitNodeColor =      { 
+                        this.state.tiles
+                            [this.state.previousCell[1]]
+                            [this.state.previousCell[0]].color
                     }
                     
-                    handleTileClick =        { this.handleTileClick } 
-                    getUserIOHandler =       { this.getUserIOHandler }
-                    onMouseExitTile =        { this.onMouseExitTile }
-                    onMouseOverTile =        { this.onMouseOverTile }
+                    handleTileClick =           { this.handleTileClick } 
+                    getUserIOHandler =          { this.getUserIOHandler }
+                    onMouseExitTile =           { this.onMouseExitTile }
+                    onMouseOverTile =           { this.onMouseOverTile }
+                    toggleIOConsoleVisibility = { this.toggleIOConsoleVisibility }
                 />
-                <Help />
             </div>
         )
     }
